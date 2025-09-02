@@ -2,5 +2,9 @@
   "name": "first-webflow-project",
   "publicDir": "public",
   "size": "comfortable",
-  "apiVersion": "2"
+  "apiVersion": "2",
+  "extension": {
+    "url": "http://localhost:1337"
+  }
 }
+

@@ -100,12 +100,6 @@ const boxPresets: ShadowPreset[] = [
     preview: "0 1px 3px rgba(0, 0, 0, 0.1)"
   },
   {
-    id: "neon",
-    name: "Neon Glow",
-    value: "0 0 10px rgba(0, 255, 255, 0.7)",
-    preview: "0 0 10px rgba(0, 255, 255, 0.7)"
-  },
-  {
     id: "elegant",
     name: "Elegant",
     value: "0 15px 35px rgba(0, 0, 0, 0.1)",
