@@ -452,28 +452,85 @@ useEffect(() => {
     if (activeTab === "background") setGradientControls(defaultGradientControls);
   };
 
-  const copyCSSCode = () => {
-    let cssCode = "";
+  // const copyCSSCode = () => {
+  //   let cssCode = "";
     
-    if (activeTab === "box") {
-      const { x, y, blur, spread, color, opacity, inset } = boxControls;
-      const rgbColor = hexToRgb(color);
-      cssCode = `box-shadow: ${inset ? "inset " : ""}${x}px ${y}px ${blur}px ${spread}px rgba(${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b}, ${opacity});`;
-    } else if (activeTab === "text") {
-      const { x, y, blur, color, opacity } = textControls;
-      const rgbColor = hexToRgb(color);
-      cssCode = `text-shadow: ${x}px ${y}px ${blur}px rgba(${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b}, ${opacity});`;
-    } else if (activeTab === "background") {
-      const { type, angle, colors } = gradientControls;
-      const colorStops = colors.map(c => `${c.color} ${c.position}%`).join(', ');
-      cssCode = `background-image: ${type}-gradient(${type === 'linear' ? `${angle}deg` : 'circle'}, ${colorStops});`;
-    }
+  //   if (activeTab === "box") {
+  //     const { x, y, blur, spread, color, opacity, inset } = boxControls;
+  //     const rgbColor = hexToRgb(color);
+  //     cssCode = `box-shadow: ${inset ? "inset " : ""}${x}px ${y}px ${blur}px ${spread}px rgba(${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b}, ${opacity});`;
+  //   } else if (activeTab === "text") {
+  //     const { x, y, blur, color, opacity } = textControls;
+  //     const rgbColor = hexToRgb(color);
+  //     cssCode = `text-shadow: ${x}px ${y}px ${blur}px rgba(${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b}, ${opacity});`;
+  //   } else if (activeTab === "background") {
+  //     const { type, angle, colors } = gradientControls;
+  //     const colorStops = colors.map(c => `${c.color} ${c.position}%`).join(', ');
+  //     cssCode = `background-image: ${type}-gradient(${type === 'linear' ? `${angle}deg` : 'circle'}, ${colorStops});`;
+  //   }
     
+  //   navigator.clipboard.writeText(cssCode).then(() => {
+  //     setCopied(true);
+  //     setTimeout(() => setCopied(false), 2000);
+  //   });
+  // };
+
+
+
+
+const copyCSSCode = () => {
+  let cssCode = "";
+  
+  if (activeTab === "box") {
+    const { x, y, blur, spread, color, opacity, inset } = boxControls;
+    const rgbColor = hexToRgb(color);
+    cssCode = `box-shadow: ${inset ? "inset " : ""}${x}px ${y}px ${blur}px ${spread}px rgba(${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b}, ${opacity});`;
+  } else if (activeTab === "text") {
+    const { x, y, blur, color, opacity } = textControls;
+    const rgbColor = hexToRgb(color);
+    cssCode = `text-shadow: ${x}px ${y}px ${blur}px rgba(${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b}, ${opacity});`;
+  } else if (activeTab === "background") {
+    const { type, angle, colors } = gradientControls;
+    const colorStops = colors.map(c => `${c.color} ${c.position}%`).join(', ');
+    cssCode = `background-image: ${type}-gradient(${type === 'linear' ? `${angle}deg` : 'circle'}, ${colorStops});`;
+  }
+
+  // Try Clipboard API first
+  if (navigator.clipboard && navigator.clipboard.writeText) {
     navigator.clipboard.writeText(cssCode).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
+    }).catch(() => {
+      // Fallback if blocked
+      const textarea = document.createElement("textarea");
+      textarea.value = cssCode;
+      document.body.appendChild(textarea);
+      textarea.select();
+      try {
+        document.execCommand("copy");
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      } catch (err) {
+        alert("Failed to copy CSS. Please copy manually.");
+      }
+      document.body.removeChild(textarea);
     });
-  };
+  } else {
+    // Fallback for very old browsers
+    const textarea = document.createElement("textarea");
+    textarea.value = cssCode;
+    document.body.appendChild(textarea);
+    textarea.select();
+    document.execCommand("copy");
+    document.body.removeChild(textarea);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  }
+};
+
+
+
+
 
   const generatePreview = () => {
     if (activeTab === "box") {
@@ -754,6 +811,8 @@ useEffect(() => {
         >
           {copied ? 'Copied!' : 'Copy'}
         </button>
+
+
         <button 
           id="applyButton" 
           className={`flex-1 py-1 text-xs bg-green-600 rounded hover:bg-green-700`}
