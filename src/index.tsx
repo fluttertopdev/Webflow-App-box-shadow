@@ -61,70 +61,70 @@ const defaultGradientControls: GradientControls = {
   ]
 };
 
-// Predefined presets
+// Predefined presets dev new
 const boxPresets: ShadowPreset[] = [
   {
     id: "soft",
     name: "Soft Shadow",
-    value: "0 4px 8px rgba(0, 0, 0, 0.12)",
-    preview: "0 4px 8px rgba(0, 0, 0, 0.12)"
+    value: "0 4px 8px rgba(0, 0, 0, 0.25)",
+    preview: "0 4px 8px rgba(0, 0, 0, 0.25)"
   },
   {
     id: "medium",
     name: "Medium Shadow",
-    value: "0 6px 12px rgba(0, 0, 0, 0.15)",
-    preview: "0 6px 12px rgba(0, 0, 0, 0.15)"
+    value: "0 6px 12px rgba(0, 0, 0, 0.35)",
+    preview: "0 6px 12px rgba(0, 0, 0, 0.35)"
   },
   {
     id: "hard",
     name: "Hard Shadow",
-    value: "0 8px 16px rgba(0, 0, 0, 0.2)",
-    preview: "0 8px 16px rgba(0, 0, 0, 0.2)"
+    value: "0 8px 16px rgba(0, 0, 0, 0.45)",
+    preview: "0 8px 16px rgba(0, 0, 0, 0.45)"
   },
   {
     id: "inner",
     name: "Inner Shadow",
-    value: "inset 0 2px 4px rgba(0, 0, 0, 0.1)",
-    preview: "inset 0 2px 4px rgba(0, 0, 0, 0.1)"
+    value: "inset 0 2px 6px rgba(0, 0, 0, 0.35)",
+    preview: "inset 0 2px 6px rgba(0, 0, 0, 0.35)"
   },
   {
     id: "floating",
     name: "Floating",
-    value: "0 10px 25px rgba(0, 0, 0, 0.15)",
-    preview: "0 10px 25px rgba(0, 0, 0, 0.15)"
+    value: "0 12px 30px rgba(0, 0, 0, 0.4)",
+    preview: "0 12px 30px rgba(0, 0, 0, 0.4)"
   },
   {
     id: "subtle",
     name: "Subtle",
-    value: "0 1px 3px rgba(0, 0, 0, 0.1)",
-    preview: "0 1px 3px rgba(0, 0, 0, 0.1)"
+    value: "0 2px 4px rgba(0, 0, 0, 0.2)",
+    preview: "0 2px 4px rgba(0, 0, 0, 0.2)"
   },
   {
     id: "elegant",
     name: "Elegant",
-    value: "0 15px 35px rgba(0, 0, 0, 0.1)",
-    preview: "0 15px 35px rgba(0, 0, 0, 0.1)"
+    value: "0 18px 40px rgba(0, 0, 0, 0.35)",
+    preview: "0 18px 40px rgba(0, 0, 0, 0.35)"
   }
 ];
 
 const textPresets: ShadowPreset[] = [
-  {
+ {
     id: "soft-text",
     name: "Soft Text",
-    value: "0 1px 2px rgba(0, 0, 0, 0.2)",
-    preview: "0 1px 2px rgba(0, 0, 0, 0.2)"
+    value: "0 1px 2px rgba(0, 0, 0, 0.35)",
+    preview: "0 1px 2px rgba(0, 0, 0, 0.35)"
   },
   {
     id: "bold-text",
     name: "Bold Text",
-    value: "0 2px 4px rgba(0, 0, 0, 0.3)",
-    preview: "0 2px 4px rgba(0, 0, 0, 0.3)"
+    value: "0 2px 4px rgba(0, 0, 0, 0.45)",
+    preview: "0 2px 4px rgba(0, 0, 0, 0.45)"
   },
   {
     id: "glow",
     name: "Glow Effect",
-    value: "0 0 8px rgba(0, 150, 255, 0.7)",
-    preview: "0 0 8px rgba(0, 150, 255, 0.7)"
+    value: "0 0 8px rgba(0, 150, 255, 0.85)",
+    preview: "0 0 8px rgba(0, 150, 255, 0.85)"
   },
   {
     id: "outline",
@@ -446,11 +446,34 @@ useEffect(() => {
     updateGradientControl("colors", newColors);
   };
 
-  const resetControls = () => {
-    if (activeTab === "box") setBoxControls(defaultBoxControls);
-    if (activeTab === "text") setTextControls(defaultTextControls);
-    if (activeTab === "background") setGradientControls(defaultGradientControls);
-  };
+const resetControls = async () => {
+  if (!selectedElement) return;
+
+  if (activeTab === "box") {
+    setBoxControls(defaultBoxControls);
+    const { x, y, blur, spread, color, opacity, inset } = defaultBoxControls;
+    const rgbColor = hexToRgb(color);
+    const shadowValue = `${inset ? "inset " : ""}${x}px ${y}px ${blur}px ${spread}px rgba(${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b}, ${opacity})`;
+    await applyStyle("box-shadow", shadowValue);
+  }
+
+  if (activeTab === "text") {
+    setTextControls(defaultTextControls);
+    const { x, y, blur, color, opacity } = defaultTextControls;
+    const rgbColor = hexToRgb(color);
+    const shadowValue = `${x}px ${y}px ${blur}px rgba(${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b}, ${opacity})`;
+    await applyStyle("text-shadow", shadowValue);
+  }
+
+  if (activeTab === "background") {
+    setGradientControls(defaultGradientControls);
+    const { type, angle, colors } = defaultGradientControls;
+    const colorStops = colors.map(c => `${c.color} ${c.position}%`).join(', ');
+    const gradientValue = `${type}-gradient(${type === "linear" ? `${angle}deg` : "circle"}, ${colorStops})`;
+    await applyStyle("background-image", gradientValue);
+  }
+};
+
 
   // const copyCSSCode = () => {
   //   let cssCode = "";
@@ -527,10 +550,6 @@ const copyCSSCode = () => {
     setTimeout(() => setCopied(false), 2000);
   }
 };
-
-
-
-
 
   const generatePreview = () => {
     if (activeTab === "box") {
