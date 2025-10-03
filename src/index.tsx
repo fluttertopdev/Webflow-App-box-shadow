@@ -590,7 +590,7 @@ const copyCSSCode = () => {
 
   if (!hasSelectedElement) {
     return (
-      <div className="w-[320px] h-[500px] bg-white shadow-xl overflow-hidden flex flex-col">
+      <div className="h-[460px] bg-white shadow-xl overflow-hidden flex flex-col">
         <div className="flex-1 flex items-center justify-center text-center p-4">
           <div className="space-y-2">
             <div className="text-4xl">👉</div>
@@ -603,7 +603,7 @@ const copyCSSCode = () => {
   }
 
   return (
-    <div className="w-[320px] h-[500px] bg-white shadow-xl overflow-hidden flex flex-col">
+    <div className="h-[460px] bg-white shadow-xl overflow-hidden flex flex-col">
       {/* Tabs */}
       <div className="p-1 bg-gray-100">
         <div className="grid grid-cols-3 gap-1">
@@ -795,7 +795,7 @@ const copyCSSCode = () => {
                       <input type="range" min="0" max="100" value={colorStop.position} onChange={e => updateGradientPosition(index, parseInt(e.target.value, 10))} className="grad-pos flex-1" />
                       <div className="w-[36px] text-[11px] text-right">{colorStop.position}%</div>
                       {gradientControls.colors.length > 2 && (
-                        <button className="ml-2 text-[11px] px-2 py-1 rounded border remove-grad" onClick={() => removeGradientColor(index)}>Remove</button>
+                        <button className="ml-2 text-[11px] px-2 py-1 rounded border remove-grad" onClick={() => removeGradientColor(index)}>🗑️</button>
                       )}
                     </div>
                   ))}
@@ -808,11 +808,6 @@ const copyCSSCode = () => {
           </div>
         )}
       </section>
-
-      {/* Generated CSS */}
-      <div className="bg-gray-100 text-xs font-mono p-2 mx-3 border code-scroll" style={{ whiteSpace: 'nowrap', overflowX: 'auto' }}>
-        <code id="generatedCode">{cssCode}</code>
-      </div>
 
       {/* Footer */}
       <footer className="p-2 bg-gray-900 text-white flex gap-1">
