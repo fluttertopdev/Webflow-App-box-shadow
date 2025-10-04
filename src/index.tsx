@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import ReactDOM from "react-dom/client";
 
+
 // Webflow API is exposed globally inside Designer Extensions
 declare const webflow: any;
 
@@ -108,7 +109,7 @@ const boxPresets: ShadowPreset[] = [
 ];
 
 const textPresets: ShadowPreset[] = [
- {
+  {
     id: "soft-text",
     name: "Soft Text",
     value: "0 1px 2px rgba(0, 0, 0, 0.35)",
@@ -186,11 +187,12 @@ const gradientPresets = [
 ];
 
 const App: React.FC = () => {
+
   const [hasSelectedElement, setHasSelectedElement] = useState(false);
   const [selectedElement, setSelectedElement] = useState<any>(null);
   const [activeTab, setActiveTab] = useState<"box" | "text" | "background">("box");
   const [activeSubTab, setActiveSubTab] = useState<"presets" | "custom">("presets");
-  
+
   // Use a different set of default values for the new UI ranges
   const [boxControls, setBoxControls] = useState<BoxShadowControls>({
     x: 10, y: 10, blur: 10, spread: 0, color: "#000000", opacity: 0.5, inset: false
@@ -204,46 +206,47 @@ const App: React.FC = () => {
   const [copied, setCopied] = useState(false);
 
 
-// 🔄 Reliable: poll the current selection and update the UI
-useEffect(() => {
-  let stopped = false;
-  let timer: any;
+  // Reliable: poll the current selection and update the UI
+  useEffect(() => {
 
-  const apiReady = () =>
-    typeof webflow !== "undefined" &&
-    webflow &&
-    typeof webflow.getSelectedElement === "function";
+    let stopped = false;
+    let timer: any;
 
-  const tick = async () => {
-    try {
-      if (!apiReady()) {
-        // Try again soon until the API is ready
-        if (!stopped) timer = setTimeout(tick, 300);
-        return;
+    const apiReady = () =>
+      typeof webflow !== "undefined" &&
+      webflow &&
+      typeof webflow.getSelectedElement === "function";
+
+    const tick = async () => {
+      try {
+        if (!apiReady()) {
+          // Try again soon until the API is ready
+          if (!stopped) timer = setTimeout(tick, 300);
+          return;
+        }
+
+        const el = await webflow.getSelectedElement();
+        const has = !!el;
+
+        setHasSelectedElement(has);
+        setSelectedElement(has ? el : null);
+      } catch (e) {
+        // If the call fails, treat as no selection
+        setHasSelectedElement(false);
+        setSelectedElement(null);
+        // (Optional) console.warn("getSelectedElement failed:", e);
+      } finally {
+        if (!stopped) timer = setTimeout(tick, 400); // poll ~2.5x/sec
       }
+    };
 
-      const el = await webflow.getSelectedElement();
-      const has = !!el;
+    tick();
 
-      setHasSelectedElement(has);
-      setSelectedElement(has ? el : null);
-    } catch (e) {
-      // If the call fails, treat as no selection
-      setHasSelectedElement(false);
-      setSelectedElement(null);
-      // (Optional) console.warn("getSelectedElement failed:", e);
-    } finally {
-      if (!stopped) timer = setTimeout(tick, 400); // poll ~2.5x/sec
-    }
-  };
-
-  tick();
-
-  return () => {
-    stopped = true;
-    clearTimeout(timer);
-  };
-}, []);
+    return () => {
+      stopped = true;
+      clearTimeout(timer);
+    };
+  }, []);
 
 
 
@@ -281,7 +284,7 @@ useEffect(() => {
         let styleName = baseStyleName;
         let count = 1;
         let nameIsUnique = false;
-        
+
         while (!nameIsUnique) {
           try {
             const existingStyle = await webflow.getStyleByName(styleName);
@@ -301,12 +304,12 @@ useEffect(() => {
             }
           }
         }
-        
+
         const newStyle = await webflow.createStyle(styleName);
         await newStyle.setProperties({ [property]: value });
         await element.setStyles([...styles, newStyle]);
       }
-      
+
       console.log(`Applied ${property}: ${value}`);
     } catch (error) {
       console.error(`Error applying ${property}:`, error);
@@ -363,7 +366,7 @@ useEffect(() => {
     const { x, y, blur, spread, color, opacity, inset } = boxControls;
     const rgbColor = hexToRgb(color);
     const shadowValue = `${inset ? "inset " : ""}${x}px ${y}px ${blur}px ${spread}px rgba(${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b}, ${opacity})`;
-    
+
     await applyStyle("box-shadow", shadowValue);
   };
 
@@ -371,7 +374,7 @@ useEffect(() => {
     const { x, y, blur, color, opacity } = textControls;
     const rgbColor = hexToRgb(color);
     const shadowValue = `${x}px ${y}px ${blur}px rgba(${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b}, ${opacity})`;
-    
+
     await applyStyle("text-shadow", shadowValue);
   };
 
@@ -379,7 +382,7 @@ useEffect(() => {
     const { type, angle, colors } = gradientControls;
     const colorStops = colors.map(c => `${c.color} ${c.position}%`).join(', ');
     const gradientValue = `${type}-gradient(${type === 'linear' ? `${angle}deg` : 'circle'}, ${colorStops})`;
-    
+
     await applyStyle("background-image", gradientValue);
   };
 
@@ -446,38 +449,38 @@ useEffect(() => {
     updateGradientControl("colors", newColors);
   };
 
-const resetControls = async () => {
-  if (!selectedElement) return;
+  const resetControls = async () => {
+    if (!selectedElement) return;
 
-  if (activeTab === "box") {
-    setBoxControls(defaultBoxControls);
-    const { x, y, blur, spread, color, opacity, inset } = defaultBoxControls;
-    const rgbColor = hexToRgb(color);
-    const shadowValue = `${inset ? "inset " : ""}${x}px ${y}px ${blur}px ${spread}px rgba(${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b}, ${opacity})`;
-    await applyStyle("box-shadow", shadowValue);
-  }
+    if (activeTab === "box") {
+      setBoxControls(defaultBoxControls);
+      const { x, y, blur, spread, color, opacity, inset } = defaultBoxControls;
+      const rgbColor = hexToRgb(color);
+      const shadowValue = `${inset ? "inset " : ""}${x}px ${y}px ${blur}px ${spread}px rgba(${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b}, ${opacity})`;
+      await applyStyle("box-shadow", shadowValue);
+    }
 
-  if (activeTab === "text") {
-    setTextControls(defaultTextControls);
-    const { x, y, blur, color, opacity } = defaultTextControls;
-    const rgbColor = hexToRgb(color);
-    const shadowValue = `${x}px ${y}px ${blur}px rgba(${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b}, ${opacity})`;
-    await applyStyle("text-shadow", shadowValue);
-  }
+    if (activeTab === "text") {
+      setTextControls(defaultTextControls);
+      const { x, y, blur, color, opacity } = defaultTextControls;
+      const rgbColor = hexToRgb(color);
+      const shadowValue = `${x}px ${y}px ${blur}px rgba(${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b}, ${opacity})`;
+      await applyStyle("text-shadow", shadowValue);
+    }
 
-  if (activeTab === "background") {
-    setGradientControls(defaultGradientControls);
-    const { type, angle, colors } = defaultGradientControls;
-    const colorStops = colors.map(c => `${c.color} ${c.position}%`).join(', ');
-    const gradientValue = `${type}-gradient(${type === "linear" ? `${angle}deg` : "circle"}, ${colorStops})`;
-    await applyStyle("background-image", gradientValue);
-  }
-};
+    if (activeTab === "background") {
+      setGradientControls(defaultGradientControls);
+      const { type, angle, colors } = defaultGradientControls;
+      const colorStops = colors.map(c => `${c.color} ${c.position}%`).join(', ');
+      const gradientValue = `${type}-gradient(${type === "linear" ? `${angle}deg` : "circle"}, ${colorStops})`;
+      await applyStyle("background-image", gradientValue);
+    }
+  };
 
 
   // const copyCSSCode = () => {
   //   let cssCode = "";
-    
+
   //   if (activeTab === "box") {
   //     const { x, y, blur, spread, color, opacity, inset } = boxControls;
   //     const rgbColor = hexToRgb(color);
@@ -491,7 +494,7 @@ const resetControls = async () => {
   //     const colorStops = colors.map(c => `${c.color} ${c.position}%`).join(', ');
   //     cssCode = `background-image: ${type}-gradient(${type === 'linear' ? `${angle}deg` : 'circle'}, ${colorStops});`;
   //   }
-    
+
   //   navigator.clipboard.writeText(cssCode).then(() => {
   //     setCopied(true);
   //     setTimeout(() => setCopied(false), 2000);
@@ -501,55 +504,55 @@ const resetControls = async () => {
 
 
 
-const copyCSSCode = () => {
-  let cssCode = "";
-  
-  if (activeTab === "box") {
-    const { x, y, blur, spread, color, opacity, inset } = boxControls;
-    const rgbColor = hexToRgb(color);
-    cssCode = `box-shadow: ${inset ? "inset " : ""}${x}px ${y}px ${blur}px ${spread}px rgba(${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b}, ${opacity});`;
-  } else if (activeTab === "text") {
-    const { x, y, blur, color, opacity } = textControls;
-    const rgbColor = hexToRgb(color);
-    cssCode = `text-shadow: ${x}px ${y}px ${blur}px rgba(${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b}, ${opacity});`;
-  } else if (activeTab === "background") {
-    const { type, angle, colors } = gradientControls;
-    const colorStops = colors.map(c => `${c.color} ${c.position}%`).join(', ');
-    cssCode = `background-image: ${type}-gradient(${type === 'linear' ? `${angle}deg` : 'circle'}, ${colorStops});`;
-  }
+  const copyCSSCode = () => {
+    let cssCode = "";
 
-  // Try Clipboard API first
-  if (navigator.clipboard && navigator.clipboard.writeText) {
-    navigator.clipboard.writeText(cssCode).then(() => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    }).catch(() => {
-      // Fallback if blocked
+    if (activeTab === "box") {
+      const { x, y, blur, spread, color, opacity, inset } = boxControls;
+      const rgbColor = hexToRgb(color);
+      cssCode = `box-shadow: ${inset ? "inset " : ""}${x}px ${y}px ${blur}px ${spread}px rgba(${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b}, ${opacity});`;
+    } else if (activeTab === "text") {
+      const { x, y, blur, color, opacity } = textControls;
+      const rgbColor = hexToRgb(color);
+      cssCode = `text-shadow: ${x}px ${y}px ${blur}px rgba(${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b}, ${opacity});`;
+    } else if (activeTab === "background") {
+      const { type, angle, colors } = gradientControls;
+      const colorStops = colors.map(c => `${c.color} ${c.position}%`).join(', ');
+      cssCode = `background-image: ${type}-gradient(${type === 'linear' ? `${angle}deg` : 'circle'}, ${colorStops});`;
+    }
+
+    // Try Clipboard API first
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(cssCode).then(() => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      }).catch(() => {
+        // Fallback if blocked
+        const textarea = document.createElement("textarea");
+        textarea.value = cssCode;
+        document.body.appendChild(textarea);
+        textarea.select();
+        try {
+          document.execCommand("copy");
+          setCopied(true);
+          setTimeout(() => setCopied(false), 2000);
+        } catch (err) {
+          alert("Failed to copy CSS. Please copy manually.");
+        }
+        document.body.removeChild(textarea);
+      });
+    } else {
+      // Fallback for very old browsers
       const textarea = document.createElement("textarea");
       textarea.value = cssCode;
       document.body.appendChild(textarea);
       textarea.select();
-      try {
-        document.execCommand("copy");
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-      } catch (err) {
-        alert("Failed to copy CSS. Please copy manually.");
-      }
+      document.execCommand("copy");
       document.body.removeChild(textarea);
-    });
-  } else {
-    // Fallback for very old browsers
-    const textarea = document.createElement("textarea");
-    textarea.value = cssCode;
-    document.body.appendChild(textarea);
-    textarea.select();
-    document.execCommand("copy");
-    document.body.removeChild(textarea);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  }
-};
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    }
+  };
 
   const generatePreview = () => {
     if (activeTab === "box") {
@@ -607,34 +610,36 @@ const copyCSSCode = () => {
       {/* Tabs */}
       <div className="p-1 bg-gray-100">
         <div className="grid grid-cols-3 gap-1">
-          <button 
-            id="tab-box" 
-            className={`tab-btn py-1 text-xs rounded-md transition-colors ${activeTab === 'box' ? 'bg-blue-200 text-blue-700 font-semibold' : 'text-gray-500 hover:text-blue-600'}`} 
+          <button
+            id="tab-box"
+            className={`tab-btn py-1 text-xs rounded-md transition-colors ${activeTab === 'box' ? 'bg-blue-200 text-blue-700 font-semibold' : 'text-gray-500 hover:text-blue-600'}`}
             onClick={() => setActiveTab('box')}
           >
             Box Shadow
           </button>
-          <button 
-            id="tab-text" 
-            className={`tab-btn py-1 text-xs rounded-md transition-colors ${activeTab === 'text' ? 'bg-blue-200 text-blue-700 font-semibold' : 'text-gray-500 hover:text-blue-600'}`} 
+          <button
+            id="tab-text"
+            className={`tab-btn py-1 text-xs rounded-md transition-colors ${activeTab === 'text' ? 'bg-blue-200 text-blue-700 font-semibold' : 'text-gray-500 hover:text-blue-600'}`}
             onClick={() => setActiveTab('text')}
           >
             Text Shadow
           </button>
-          <button 
-            id="tab-bg" 
-            className={`tab-btn py-1 text-xs rounded-md transition-colors ${activeTab === 'background' ? 'bg-blue-200 text-blue-700 font-semibold' : 'text-gray-500 hover:text-blue-600'}`} 
+          <button
+            id="tab-bg"
+            className={`tab-btn py-1 text-xs rounded-md transition-colors ${activeTab === 'background' ? 'bg-blue-200 text-blue-700 font-semibold' : 'text-gray-500 hover:text-blue-600'}`}
             onClick={() => setActiveTab('background')}
           >
             Gradient
           </button>
+
+
         </div>
       </div>
 
       {/* Preview */}
-      <div className="flex items-center justify-center flex-shrink-0 h-32 bg-gray-200 m-2">
-        <div 
-          id="previewBox" 
+      <div className="flex items-center justify-center flex-shrink-0 h-40 bg-gray-200 m-2 p-4 overflow-hidden">
+        <div
+          id="previewBox"
           className="w-24 h-24 bg-white rounded-xl transition-all duration-300 flex items-center justify-center text-xs font-semibold"
           style={previewStyle}
         >
@@ -644,15 +649,15 @@ const copyCSSCode = () => {
 
       {/* Presets / Custom */}
       <div className="flex gap-1 m-2">
-        <button 
-          id="btn-presets" 
-          className={`flex-1 py-1 text-xs rounded shadow transition-colors ${activeSubTab === 'presets' ? 'bg-blue-100 text-blue-700' : 'text-gray-500 hover:text-blue-600'}`} 
+        <button
+          id="btn-presets"
+          className={`flex-1 py-1 text-xs rounded shadow transition-colors ${activeSubTab === 'presets' ? 'bg-blue-100 text-blue-700' : 'text-gray-500 hover:text-blue-600'}`}
           onClick={() => setActiveSubTab('presets')}
         >
           Presets
         </button>
-        <button 
-          id="btn-custom" 
+        <button
+          id="btn-custom"
           className={`flex-1 py-1 text-xs rounded shadow transition-colors ${activeSubTab === 'custom' ? 'bg-blue-100 text-blue-700' : 'text-gray-500 hover:text-blue-600'}`}
           onClick={() => setActiveSubTab('custom')}
         >
@@ -661,29 +666,39 @@ const copyCSSCode = () => {
       </div>
 
       {/* Controls (scrollable) */}
-      <section id="controls" className="flex-1 overflow-y-auto p-2 space-y-2 text-xs">
+      <section id="controls" className="flex-1 overflow-y-auto p-2 space-y-2 text-xs ">
         {activeSubTab === 'presets' ? (
-          <div id="presetsGrid" className="grid grid-cols-3 gap-2">
-            {(activeTab === "box" ? boxPresets : 
+          <div id="presetsGrid" className="grid grid-cols-3 gap-2 overflow-hidden">
+            {(activeTab === "box" ? boxPresets :
               activeTab === "text" ? textPresets : gradientPresets).map(preset => (
-              <button
-                key={preset.id}
-                className="preset-card p-1 rounded-lg bg-white border hover:shadow-md transition-shadow"
-                onClick={() => {
-                  if (activeTab === 'box') applyBoxPreset(preset);
-                  else if (activeTab === 'text') applyTextPreset(preset);
-                  else if (activeTab === 'background') applyGradientPreset(preset);
-                }}
-              >
-                <div 
-                  className="h-12 rounded-md w-full flex items-center justify-center text-[11px]"
-                  style={activeTab === 'box' ? {boxShadow: preset.preview} : activeTab === 'text' ? {textShadow: preset.preview} : {backgroundImage: preset.preview}}
-                >
-                  {activeTab === 'text' && 'Text'}
+                <div key={preset.id} className="overflow-hidden rounded-lg"> {/* Wrapper div with overflow-hidden */}
+                  <button
+                    className="preset-card p-1 bg-white border border-gray-200 border-solid hover:shadow-md transition-shadow w-full h-full"
+                    onClick={() => {
+                      if (activeTab === 'box') applyBoxPreset(preset);
+                      else if (activeTab === 'text') applyTextPreset(preset);
+                      else if (activeTab === 'background') applyGradientPreset(preset);
+                    }}
+                  >
+                    <div
+                      className="h-16 rounded-md  flex items-center justify-center text-[11px] mx-auto" // h-16 and mx-auto
+                      style={activeTab === 'box' ? {
+                        boxShadow: preset.preview,
+                        width: '80%' // Reduced width
+                      } : activeTab === 'text' ? {
+                        textShadow: preset.preview,
+                        width: '80%'
+                      } : {
+                        backgroundImage: preset.preview,
+                        width: '80%'
+                      }}
+                    >
+                      {activeTab === 'text' && 'Webflow'}
+                    </div>
+                    <div className="mt-1 text-[11px] text-center px-1">{preset.name}</div> {/* Added px-1 */}
+                  </button>
                 </div>
-                <div className="mt-1 text-[11px] text-center">{preset.name}</div>
-              </button>
-            ))}
+              ))}
           </div>
         ) : (
           <div id="customControls" className="space-y-2">
@@ -692,9 +707,9 @@ const copyCSSCode = () => {
                 <div id="insetRow" className="flex items-center gap-2 mb-2">
                   <span className="w-12 text-[11px] text-center">Outset</span>
                   <label className="relative inline-flex items-center cursor-pointer">
-                    <input 
-                      id="insetToggle" 
-                      type="checkbox" 
+                    <input
+                      id="insetToggle"
+                      type="checkbox"
                       className="sr-only peer"
                       checked={boxControls.inset}
                       onChange={e => updateBoxControl('inset', e.target.checked)}
@@ -705,35 +720,87 @@ const copyCSSCode = () => {
                   <span className="w-12 text-[11px] text-center">Inset</span>
                 </div>
                 <div id="boxControls" className="space-y-2">
-                  <div className="slider-container bg-gray-50 p-1 rounded shadow-sm flex items-center gap-2">
-                    <label htmlFor="xOffset" className="slider-label w-[55px] text-[11px]">X Offset</label>
-                    <input type="range" id="xOffset" min="-100" max="100" value={boxControls.x} onChange={e => updateBoxControl('x', parseInt(e.target.value, 10))} className="slider-input flex-1" />
-                    <div className="slider-value w-[30px] text-right text-[11px]">{boxControls.x}</div>
+                  <div className="slider-container">
+                    <label htmlFor="xOffset" className="slider-label">X Offset</label>
+                    <input
+                      type="range"
+                      id="xOffset"
+                      min="-100"
+                      max="100"
+                      value={boxControls.x}
+                      onChange={e => updateBoxControl('x', parseInt(e.target.value, 10))}
+                      className="slider-input"
+                    />
+                    <div className="slider-value">{boxControls.x}</div>
                   </div>
-                  <div className="slider-container bg-gray-50 p-1 rounded shadow-sm flex items-center gap-2">
-                    <label htmlFor="yOffset" className="slider-label w-[55px] text-[11px]">Y Offset</label>
-                    <input type="range" id="yOffset" min="-100" max="100" value={boxControls.y} onChange={e => updateBoxControl('y', parseInt(e.target.value, 10))} className="slider-input flex-1" />
-                    <div className="slider-value w-[30px] text-right text-[11px]">{boxControls.y}</div>
+
+                  <div className="slider-container">
+                    <label htmlFor="yOffset" className="slider-label">Y Offset</label>
+                    <input
+                      type="range"
+                      id="yOffset"
+                      min="-100"
+                      max="100"
+                      value={boxControls.y}
+                      onChange={e => updateBoxControl('y', parseInt(e.target.value, 10))}
+                      className="slider-input"
+                    />
+                    <div className="slider-value">{boxControls.y}</div>
                   </div>
-                  <div className="slider-container bg-gray-50 p-1 rounded shadow-sm flex items-center gap-2">
-                    <label htmlFor="blur" className="slider-label w-[55px] text-[11px]">Blur</label>
-                    <input type="range" id="blur" min="0" max="100" value={boxControls.blur} onChange={e => updateBoxControl('blur', parseInt(e.target.value, 10))} className="slider-input flex-1" />
-                    <div className="slider-value w-[30px] text-right text-[11px]">{boxControls.blur}</div>
+
+                  <div className="slider-container">
+                    <label htmlFor="blur" className="slider-label">Blur</label>
+                    <input
+                      type="range"
+                      id="blur"
+                      min="0"
+                      max="100"
+                      value={boxControls.blur}
+                      onChange={e => updateBoxControl('blur', parseInt(e.target.value, 10))}
+                      className="slider-input"
+                    />
+                    <div className="slider-value">{boxControls.blur}</div>
                   </div>
-                  <div className="slider-container bg-gray-50 p-1 rounded shadow-sm flex items-center gap-2">
-                    <label htmlFor="spread" className="slider-label w-[55px] text-[11px]">Spread</label>
-                    <input type="range" id="spread" min="-50" max="50" value={boxControls.spread} onChange={e => updateBoxControl('spread', parseInt(e.target.value, 10))} className="slider-input flex-1" />
-                    <div className="slider-value w-[30px] text-right text-[11px]">{boxControls.spread}</div>
+
+                  <div className="slider-container">
+                    <label htmlFor="spread" className="slider-label">Spread</label>
+                    <input
+                      type="range"
+                      id="spread"
+                      min="-50"
+                      max="50"
+                      value={boxControls.spread}
+                      onChange={e => updateBoxControl('spread', parseInt(e.target.value, 10))}
+                      className="slider-input"
+                    />
+                    <div className="slider-value">{boxControls.spread}</div>
                   </div>
-                  <div className="slider-container bg-gray-50 p-1 rounded shadow-sm flex items-center gap-2">
-                    <label htmlFor="opacity" className="slider-label w-[55px] text-[11px]">Opacity</label>
-                    <input type="range" id="opacity" min="0" max="1" step="0.01" value={boxControls.opacity} onChange={e => updateBoxControl('opacity', parseFloat(e.target.value))} className="slider-input flex-1" />
-                    <div className="slider-value w-[30px] text-right text-[11px]">{boxControls.opacity.toFixed(2)}</div>
+
+                  <div className="slider-container">
+                    <label htmlFor="opacity" className="slider-label">Opacity</label>
+                    <input
+                      type="range"
+                      id="opacity"
+                      min="0"
+                      max="1"
+                      step="0.01"
+                      value={boxControls.opacity}
+                      onChange={e => updateBoxControl('opacity', parseFloat(e.target.value))}
+                      className="slider-input"
+                    />
+                    <div className="slider-value">{boxControls.opacity.toFixed(2)}</div>
                   </div>
-                  <div className="slider-container bg-gray-50 p-1 rounded shadow-sm flex items-center gap-2">
-                    <label htmlFor="shadowColor" className="slider-label w-[55px] text-[11px]">Color</label>
-                    <input type="color" id="shadowColor" value={boxControls.color} onChange={e => updateBoxControl('color', e.target.value)} className="h-8 w-10 border-0" />
-                    <div className="ml-2 text-[11px]">{boxControls.color}</div>
+
+                  <div className="slider-container">
+                    <label htmlFor="shadowColor" className="slider-label">Color</label>
+                    <input
+                      type="color"
+                      id="shadowColor"
+                      value={boxControls.color}
+                      onChange={e => updateBoxControl('color', e.target.value)}
+                      className="color-input"
+                    />
+                    <div className="ml-2 text-sm text-gray-700">{boxControls.color}</div>
                   </div>
                 </div>
               </>
@@ -756,22 +823,30 @@ const copyCSSCode = () => {
                   <div className="slider-value w-[30px] text-right text-[11px]">{textControls.blur}</div>
                 </div>
                 <div className="slider-container bg-gray-50 p-1 rounded shadow-sm flex items-center gap-2">
-                  <label className="slider-label w-[55px] text-[11px]">Color</label>
-                  <input type="color" id="textColor" value={textControls.color} onChange={e => updateTextControl('color', e.target.value)} className="h-8 w-10 border-0" />
-                </div>
-                <div className="slider-container bg-gray-50 p-1 rounded shadow-sm flex items-center gap-2">
                   <label className="slider-label w-[55px] text-[11px]">Opacity</label>
                   <input type="range" id="textOpacity" min="0" max="1" step="0.01" value={textControls.opacity} onChange={e => updateTextControl('opacity', parseFloat(e.target.value))} className="slider-input flex-1" />
                   <div className="slider-value w-[30px] text-right text-[11px]">{textControls.opacity.toFixed(2)}</div>
                 </div>
+                <div className="slider-container">
+                  <label htmlFor="shadowColor" className="slider-label">Color</label>
+                  <input
+                    type="color"
+                    id="shadowColor"
+                    value={boxControls.color}
+                    onChange={e => updateBoxControl('color', e.target.value)}
+                    className="color-input"
+                  />
+                  <div className="ml-2 text-sm text-gray-700">{boxControls.color}</div>
+                </div>
+
               </div>
             )}
             {activeTab === 'background' && (
               <div id="bgControls" className="space-y-2">
                 <div className="flex items-center gap-2 bg-gray-50 p-1 rounded shadow-sm">
                   <label className="w-[90px] text-[11px]">Gradient Type</label>
-                  <select 
-                    id="gradType" 
+                  <select
+                    id="gradType"
                     className="flex-1 text-xs border rounded px-2 py-1"
                     value={gradientControls.type}
                     onChange={e => updateGradientControl('type', e.target.value)}
@@ -791,9 +866,21 @@ const copyCSSCode = () => {
                   {gradientControls.colors.map((colorStop, index) => (
                     <div key={index} className="flex items-center gap-2 bg-gray-50 p-1 rounded shadow-sm">
                       <label className="w-[60px] text-[11px]">Color {index + 1}</label>
-                      <input type="color" className="grad-color" value={colorStop.color} onChange={e => updateGradientColor(index, e.target.value)} />
-                      <input type="range" min="0" max="100" value={colorStop.position} onChange={e => updateGradientPosition(index, parseInt(e.target.value, 10))} className="grad-pos flex-1" />
-                      <div className="w-[36px] text-[11px] text-right">{colorStop.position}%</div>
+                      <input
+                        type="color"
+                        className="grad-color"
+                        value={colorStop.color}
+                        onChange={e => updateGradientColor(index, e.target.value)}
+                      />
+                      <input
+                        type="range"
+                        min="0"
+                        max="100"
+                        value={colorStop.position}
+                        onChange={e => updateGradientPosition(index, parseInt(e.target.value, 10))}
+                        className="grad-pos flex-1"
+                      />
+                      <div className="slider-value">{colorStop.position}%</div>
                       {gradientControls.colors.length > 2 && (
                         <button className="ml-2 text-[11px] px-2 py-1 rounded border remove-grad" onClick={() => removeGradientColor(index)}>🗑️</button>
                       )}
@@ -811,15 +898,15 @@ const copyCSSCode = () => {
 
       {/* Footer */}
       <footer className="p-2 bg-gray-900 text-white flex gap-1">
-        <button 
-          id="resetButton" 
+        <button
+          id="resetButton"
           className="flex-1 py-1 text-xs bg-gray-700 rounded hover:bg-gray-600"
           onClick={resetControls}
         >
           Reset
         </button>
-        <button 
-          id="copyButton" 
+        <button
+          id="copyButton"
           className={`flex-1 py-1 text-xs rounded hover:bg-blue-700 transition-colors ${copied ? 'bg-green-600' : 'bg-blue-600'}`}
           onClick={copyCSSCode}
         >
@@ -827,8 +914,8 @@ const copyCSSCode = () => {
         </button>
 
 
-        <button 
-          id="applyButton" 
+        <button
+          id="applyButton"
           className={`flex-1 py-1 text-xs bg-green-600 rounded hover:bg-green-700`}
           onClick={() => {
             if (activeTab === 'box') applyCustomBoxShadow();
