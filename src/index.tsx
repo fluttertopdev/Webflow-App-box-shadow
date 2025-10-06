@@ -248,7 +248,7 @@ const App: React.FC = () => {
     };
   }, []);
 
-
+// applystyle section
 const applyStyle = async (property: string, value: string) => {
   const element = await webflow.getSelectedElement();
   if (!element) {
