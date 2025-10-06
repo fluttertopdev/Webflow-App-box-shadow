@@ -66,25 +66,25 @@ const defaultGradientControls: GradientControls = {
 const boxPresets: ShadowPreset[] = [
   {
     id: "soft",
-    name: "Soft Shadow",
+    name: "Soft ",
     value: "0 4px 8px rgba(0, 0, 0, 0.25)",
     preview: "0 4px 8px rgba(0, 0, 0, 0.25)"
   },
   {
     id: "medium",
-    name: "Medium Shadow",
+    name: "Medium ",
     value: "0 6px 12px rgba(0, 0, 0, 0.35)",
     preview: "0 6px 12px rgba(0, 0, 0, 0.35)"
   },
   {
     id: "hard",
-    name: "Hard Shadow",
+    name: "Hard ",
     value: "0 8px 16px rgba(0, 0, 0, 0.45)",
     preview: "0 8px 16px rgba(0, 0, 0, 0.45)"
   },
   {
     id: "inner",
-    name: "Inner Shadow",
+    name: "Inner ",
     value: "inset 0 2px 6px rgba(0, 0, 0, 0.35)",
     preview: "inset 0 2px 6px rgba(0, 0, 0, 0.35)"
   },
@@ -249,76 +249,105 @@ const App: React.FC = () => {
   }, []);
 
 
+const applyStyle = async (property: string, value: string) => {
+  const element = await webflow.getSelectedElement();
+  if (!element) {
+    alert("No element selected. Please select an element in the Webflow Designer.");
+    return;
+  }
 
-  const applyStyle = async (property: string, value: string) => {
-    const element = await webflow.getSelectedElement();
-    if (!element) {
-      alert("No element selected. Please select an element in the Webflow Designer.");
+  setIsApplying(true);
+  try {
+    if (!element.styles) {
+      alert("This element does not support styles.");
       return;
     }
 
-    setIsApplying(true);
-    try {
-      if (!element.styles) {
-        alert("This element does not support styles.");
-        return;
+    const styles = await element.getStyles();
+    
+    // Check if styles is iterable (array)
+    let stylesArray = [];
+    if (Array.isArray(styles)) {
+      stylesArray = styles;
+    } else if (styles && typeof styles[Symbol.iterator] === 'function') {
+      // Convert iterable to array
+      stylesArray = Array.from(styles);
+    } else {
+      // If it's not iterable, create empty array
+      stylesArray = [];
+    }
+
+    let targetStyle = null;
+    let existingStyleWithProperty = null;
+
+    // First, check if any existing style already has this property
+    for (const style of stylesArray) {
+      const properties = await style.getProperties();
+      if (properties && property in properties) {
+        existingStyleWithProperty = style;
+        break;
       }
+    }
 
-      const styles = await element.getStyles();
-      let targetStyle = null;
+    // If we found an existing style with this property, use it
+    if (existingStyleWithProperty) {
+      targetStyle = existingStyleWithProperty;
+    } 
+    // If no existing style has this property, check if element has only one style (likely a combo class)
+    else if (stylesArray.length === 1) {
+      targetStyle = stylesArray[0];
+    }
+    // If element has multiple styles but none have this property, create a new one
+    else {
+      let baseStyleName = property.replace('-', '_') + '_style';
+      let styleName = baseStyleName;
+      let count = 1;
+      let nameIsUnique = false;
 
-      for (const style of styles) {
-        const properties = await style.getProperties();
-        if (properties && property in properties) {
-          targetStyle = style;
-          break;
-        }
-      }
-
-      if (targetStyle) {
-        const currentProperties = await targetStyle.getProperties();
-        const newProperties = { ...currentProperties, [property]: value };
-        await targetStyle.setProperties(newProperties);
-      } else {
-        let baseStyleName = property.replace('-', '_') + '_style';
-        let styleName = baseStyleName;
-        let count = 1;
-        let nameIsUnique = false;
-
-        while (!nameIsUnique) {
-          try {
-            const existingStyle = await webflow.getStyleByName(styleName);
-            if (existingStyle) {
-              styleName = `${baseStyleName}-${count}`;
-              count++;
-            } else {
-              nameIsUnique = true;
-            }
-          } catch (error) {
-            if (error.code === 404) {
-              nameIsUnique = true;
-            } else {
-              console.error("Error checking for existing style:", error);
-              styleName = `${property}-${Date.now()}`;
-              nameIsUnique = true;
-            }
+      while (!nameIsUnique) {
+        try {
+          const existingStyle = await webflow.getStyleByName(styleName);
+          if (existingStyle) {
+            styleName = `${baseStyleName}-${count}`;
+            count++;
+          } else {
+            nameIsUnique = true;
+          }
+        } catch (error: any) {
+          if (error.code === 404) {
+            nameIsUnique = true;
+          } else {
+            console.error("Error checking for existing style:", error);
+            styleName = `${property}-${Date.now()}`;
+            nameIsUnique = true;
           }
         }
-
-        const newStyle = await webflow.createStyle(styleName);
-        await newStyle.setProperties({ [property]: value });
-        await element.setStyles([...styles, newStyle]);
       }
 
-      console.log(`Applied ${property}: ${value}`);
-    } catch (error) {
-      console.error(`Error applying ${property}:`, error);
-      alert(`Failed to apply the ${property}. Please try again. Check the console for details.`);
-    } finally {
-      setIsApplying(false);
+      const newStyle = await webflow.createStyle(styleName);
+      await newStyle.setProperties({ [property]: value });
+      
+      // Combine existing styles with new style
+      const updatedStyles = [...stylesArray, newStyle];
+      await element.setStyles(updatedStyles);
+      targetStyle = newStyle;
     }
-  };
 
+    // Apply the property value to the target style
+    if (targetStyle) {
+      const currentProperties = await targetStyle.getProperties();
+      const newProperties = { ...currentProperties, [property]: value };
+      await targetStyle.setProperties(newProperties);
+    }
+
+    console.log(`Applied ${property}: ${value}`);
+  } catch (error) {
+    console.error(`Error applying ${property}:`, error);
+    alert(`Failed to apply the ${property}. Please try again. Check the console for details.`);
+  } finally {
+    setIsApplying(false);
+  }
+};
 
   // Functions to apply presets and custom values
   const applyBoxPreset = async (preset: ShadowPreset) => {
@@ -449,33 +478,38 @@ const App: React.FC = () => {
     updateGradientControl("colors", newColors);
   };
 
-  const resetControls = async () => {
-    if (!selectedElement) return;
+ const resetControls = async () => {
+  if (!selectedElement) return;
 
+  setIsApplying(true);
+  try {
     if (activeTab === "box") {
+      // Reset to default values in UI
       setBoxControls(defaultBoxControls);
-      const { x, y, blur, spread, color, opacity, inset } = defaultBoxControls;
-      const rgbColor = hexToRgb(color);
-      const shadowValue = `${inset ? "inset " : ""}${x}px ${y}px ${blur}px ${spread}px rgba(${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b}, ${opacity})`;
-      await applyStyle("box-shadow", shadowValue);
+      // Remove box-shadow completely
+      await applyStyle("box-shadow", "none");
     }
 
     if (activeTab === "text") {
+      // Reset to default values in UI
       setTextControls(defaultTextControls);
-      const { x, y, blur, color, opacity } = defaultTextControls;
-      const rgbColor = hexToRgb(color);
-      const shadowValue = `${x}px ${y}px ${blur}px rgba(${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b}, ${opacity})`;
-      await applyStyle("text-shadow", shadowValue);
+      // Remove text-shadow completely
+      await applyStyle("text-shadow", "none");
     }
 
     if (activeTab === "background") {
+      // Reset to default values in UI
       setGradientControls(defaultGradientControls);
-      const { type, angle, colors } = defaultGradientControls;
-      const colorStops = colors.map(c => `${c.color} ${c.position}%`).join(', ');
-      const gradientValue = `${type}-gradient(${type === "linear" ? `${angle}deg` : "circle"}, ${colorStops})`;
-      await applyStyle("background-image", gradientValue);
+      // Remove background-image completely
+      await applyStyle("background-image", "none");
     }
-  };
+  } catch (error) {
+    console.error("Error resetting controls:", error);
+    alert("Failed to reset. Please try again.");
+  } finally {
+    setIsApplying(false);
+  }
+};
 
 
   // const copyCSSCode = () => {
@@ -898,13 +932,14 @@ const App: React.FC = () => {
 
       {/* Footer */}
       <footer className="p-2 bg-gray-900 text-white flex gap-1">
-        <button
-          id="resetButton"
-          className="flex-1 py-1 text-xs bg-gray-700 rounded hover:bg-gray-600"
-          onClick={resetControls}
-        >
-          Reset
-        </button>
+       <button
+    id="resetButton"
+    className="flex-1 py-1 text-xs bg-gray-700 rounded hover:bg-gray-600"
+    onClick={resetControls}  
+    disabled={isApplying}
+  >
+    Reset
+  </button>
         <button
           id="copyButton"
           className={`flex-1 py-1 text-xs rounded hover:bg-blue-700 transition-colors ${copied ? 'bg-green-600' : 'bg-blue-600'}`}
