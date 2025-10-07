@@ -1137,11 +1137,11 @@ const App: React.FC = () => {
                   <input
                     type="color"
                     id="shadowColor"
-                    value={boxControls.color}
-                    onChange={e => updateBoxControl('color', e.target.value)}
+                    value={textControls.color} 
+                    onChange={e => updateTextControl('color', e.target.value)}
                     className="color-input"
                   />
-                  <div className="ml-2 text-sm text-gray-700">{boxControls.color}</div>
+                   <div className="ml-2 text-sm text-gray-700">{textControls.color}</div>
                 </div>
 
               </div>
