@@ -101,10 +101,130 @@ const boxPresets: ShadowPreset[] = [
     preview: "0 2px 4px rgba(0, 0, 0, 0.2)"
   },
   {
+    id: "light-inset",
+    name: "Light Inset",
+    value: "rgb(230,230,230) 0px 55px 25px -25px inset",
+    preview: "rgb(230,230,230) 0px 55px 25px -25px inset"
+  },
+  {
     id: "elegant",
     name: "Elegant",
     value: "0 18px 40px rgba(0, 0, 0, 0.35)",
     preview: "0 18px 40px rgba(0, 0, 0, 0.35)"
+  },
+  {
+    id: "soft-dark",
+    name: "Soft Dark",
+    value: "rgba(0,0,0,0.357) 1.6px 1.6px 3.2px 0px",
+    preview: "rgba(0,0,0,0.357) 1.6px 1.6px 3.2px 0px"
+  },
+  {
+    id: "dark-shadow",
+    name: "Dark Shadow",
+    value: "rgba(0,0,0,0.8) 4px 4px 10px 0px",
+    preview: "rgba(0,0,0,0.8) 4px 4px 10px 0px"
+  },
+  {
+    id: "double-glow",
+    name: "Double Glow",
+    value: "0 3px 9px 4px rgba(200,85,238,0.56)",
+    preview: "0 3px 9px 4px rgba(200,85,238,0.56)",
+  },
+  {
+    id: "green-glow",
+    name: "Green Glow",
+    value: "0 4px 28px 0 rgba(26,188,72,0.5)",
+    preview: "0 4px 28px 0 rgba(26,188,72,0.5)"
+  },
+  {
+    id: "blue-glow",
+    name: "Blue Glow",
+    value: "0 0 10px 10px #5b95e5",
+    preview: "0 0 10px 10px #5b95e5"
+  },
+  {
+    id: "inner-red",
+    name: "Inner Red ",
+    value: "inset 0 0 10px 7px #ff0000, 0 0 0 currentColor, 0 0 0 currentColor",
+    preview: "inset 0 0 10px 7px #ff0000, 0 0 0 currentColor, 0 0 0 currentColor"
+  },
+  {
+    id: "blue",
+    name: "Blue",
+    value: "2px 29px 29px -1px rgba(94, 120, 179, 0.53)",
+    preview: "2px 29px 29px -1px rgba(94, 120, 179, 0.53)"
+  },
+  {
+    id: "multi-color",
+    name: "Multi Color",
+    value: "14px 3px 10px 5px #f4eb0d50, -1px -12px 10px 5px #0deebf50, -10px 12px 10px 5px #ee0d4350",
+    preview: "14px 3px 10px 5px #f4eb0d50, -1px -12px 10px 5px #0deebf50, -10px 12px 10px 5px #ee0d4350"
+  },
+  {
+    id: "blue-outline",
+    name: "Blue Outline",
+    value: "rgba(16,155,172,0.2) 0px 0px 0px 2px",
+    preview: "rgba(16,155,172,0.2) 0px 0px 0px 2px"
+  },
+  {
+    id: "orange-outline",
+    name: "Orange Outline",
+    value: "rgba(202,74,31,0.12) 0px 0px 0px 7.58316px",
+    preview: "rgba(202,74,31,0.12) 0px 0px 0px 7.58316px"
+  },
+  {
+    id: "double-border",
+    name: "Double Border",
+    value: "rgb(195,196,199) 0px 0px 0px 1px,rgba(0,0,0,0.07) 0px 2px 4px 0px",
+    preview: "rgb(195,196,199) 0px 0px 0px 1px,rgba(0,0,0,0.07) 0px 2px 4px 0px"
+  },
+  {
+    id: "orange-border",
+    name: "Orange Border",
+    value: "rgb(226,119,48) 0px 0px 0px 2px,rgba(0,0,0,0.15) 0px 2px 4px 0px",
+    preview: "rgb(226,119,48) 0px 0px 0px 2px,rgba(0,0,0,0.15) 0px 2px 4px 0px"
+  },
+  {
+    id: "cyan-outline",
+    name: "Cyan Outline",
+    value: "rgb(51,180,206) 0px 0px 0px 4px",
+    preview: "rgb(51,180,206) 0px 0px 0px 4px"
+  },
+  {
+    id: "double-outline",
+    name: "Double Outline",
+    value: "rgb(30,30,30) 0px 0px 0px 3px,rgb(0,124,186) 0px 0px 0px 6px",
+    preview: "rgb(30,30,30) 0px 0px 0px 3px,rgb(0,124,186) 0px 0px 0px 6px"
+  },
+  {
+    id: "complex-multi",
+    name: "Complex Multi",
+    value: "rgba(0,0,0,0) 0px 0px 0px 0px,rgba(0,0,0,0) 0px 0px 0px 0px,rgb(255,255,255) 0px 1px 0px 0px inset,rgba(213,217,232,0.88) 0px 0px 0px 1px,rgba(29,33,48,0.04) 0px 5px 5px -2.5px,rgba(255,129,112,0.16) 0px 10px 10px -5px,rgba(255,129,112,0.08) 0px 24px 24px -8px",
+    preview: "rgba(0,0,0,0) 0px 0px 0px 0px,rgba(0,0,0,0) 0px 0px 0px 0px,rgb(255,255,255) 0px 1px 0px 0px inset,rgba(213,217,232,0.88) 0px 0px 0px 1px,rgba(29,33,48,0.04) 0px 5px 5px -2.5px,rgba(255,129,112,0.16) 0px 10px 10px -5px,rgba(255,129,112,0.08) 0px 24px 24px -8px"
+  },
+  {
+    id: "orange-inset",
+    name: "Orange Inset",
+    value: "rgb(248,161,0) 0px 0px 10px 0px inset",
+    preview: "rgb(248,161,0) 0px 0px 10px 0px inset"
+  },
+  {
+    id: "glow-combo",
+    name: "Glow Combo",
+    value: "0 0 2px 0 #000000, 0 0 0 currentColor,inset 0 0 16px currentColor",
+    preview: "0 0 2px 0 #000000, 0 0 0 currentColor,inset 0 0 16px currentColor"
+  },
+  {
+    id: "top-dark",
+    name: "Top Dark",
+    value: "rgba(0,0,0,0) 0px 0px 0px 0px,rgba(0,0,0,0) 0px 0px 0px 0px,rgb(17,17,17) 0px -12px 16px 0px",
+    preview: "rgba(0,0,0,0) 0px 0px 0px 0px,rgba(0,0,0,0) 0px 0px 0px 0px,rgb(17,17,17) 0px -12px 16px 0px"
+  },
+  {
+    id: "dark-deep",
+    name: "Dark Deep ",
+    value: "rgb(4,0,17) 0px 0px 300px 0px inset",
+    preview: "rgb(4,0,17) 0px 0px 300px 0px inset"
   }
 ];
 
@@ -144,7 +264,31 @@ const textPresets: ShadowPreset[] = [
     name: "Neon Text",
     value: "0 0 5px #fff, 0 0 10px #fff, 0 0 15px #ff00ff, 0 0 20px #ff00ff",
     preview: "0 0 5px rgba(255, 255, 255, 0.8), 0 0 10px rgba(255, 0, 255, 0.5)"
-  }
+  },
+  {
+    id: "Distant-text",
+    name: "Distant Text",
+    value: "0px 3px 0px #b2a98f, 0px 14px 10px rgba(0,0,0,0.15), 0px 24px 2px rgba(0,0,0,0.1), 0px 24px 30px rgba(0,0,0,0.1)",
+    preview: "0px 3px 0px #b2a98f, 0px 14px 10px rgba(0,0,0,0.15), 0px 24px 2px rgba(0,0,0,0.1), 0px 24px 30px rgba(0,0,0,0.1)"
+  },
+  {
+    id: "Heavy-text",
+    name: "Heavy Text",
+    value: "0px 4px 3px rgba(0,0,0,0.4), 0px 8px 13px rgba(0,0,0,0.1), 0px 18px 23px rgba(0,0,0,0.1)",
+    preview: "0px 4px 3px rgba(0,0,0,0.4), 0px 8px 13px rgba(0,0,0,0.1), 0px 18px 23px rgba(0,0,0,0.1)"
+  },
+  {
+    id: "seventies-style",
+    name: "70's Style Text",
+    value: "-10px 10px 0px #00e6e6",
+    preview: "-10px 10px 0px #00e6e6"
+  },
+  {
+    id: "multiple-light",
+    name: "Multiple Light",
+    value: "0px 15px 5px rgba(0,0,0,0.1), 10px 20px 5px rgba(0,0,0,0.05), -10px 20px 5px rgba(0,0,0,0.05)",
+    preview: "0px 15px 5px rgba(0,0,0,0.1), 10px 20px 5px rgba(0,0,0,0.05), -10px 20px 5px rgba(0,0,0,0.05)"
+  },
 ];
 
 const gradientPresets = [
@@ -183,6 +327,78 @@ const gradientPresets = [
     name: "Radial Moon",
     value: "radial-gradient(circle, #a1c4fd 0%, #c2e9fb 100%)",
     preview: "radial-gradient(circle, #a1c4fd 0%, #c2e9fb 100%)"
+  },
+  {
+    id: "fresh-green",
+    name: "Fresh Green",
+    value: "linear-gradient(120deg, #d4fc79 0%, #96e6a1 100%)",
+    preview: "linear-gradient(120deg, #d4fc79 0%, #96e6a1 100%)"
+  },
+  {
+    id: "cool-gray",
+    name: "Cool Gray",
+    value: "linear-gradient(to top, #cfd9df 0%, #e2ebf0 100%)",
+    preview: "linear-gradient(to top, #cfd9df 0%, #e2ebf0 100%)"
+  },
+  {
+    id: "ocean-deep",
+    name: "Ocean Deep",
+    value: "linear-gradient(to top, #30cfd0 0%, #330867 100%)",
+    preview: "linear-gradient(to top, #30cfd0 0%, #330867 100%)"
+  },
+  {
+    id: "sunny-sky",
+    name: "Sunny Sky",
+    value: "linear-gradient(to top, #fddb92 0%, #d1fdff 100%)",
+    preview: "linear-gradient(to top, #fddb92 0%, #d1fdff 100%)"
+  },
+  {
+    id: "purple-blue",
+    name: "Purple Blue",
+    value: "linear-gradient(to right, #6a11cb 0%, #2575fc 100%)",
+    preview: "linear-gradient(to right, #6a11cb 0%, #2575fc 100%)"
+  },
+  {
+    id: "rainbow-pastel",
+    name: "Rainbow Pastel",
+    value: "linear-gradient(to right, #e4afcb 0%, #b8cbb8 0%, #b8cbb8 0%, #e2c58b 30%, #c2ce9c 64%, #7edbdc 100%)",
+    preview: "linear-gradient(to right, #e4afcb 0%, #b8cbb8 0%, #b8cbb8 0%, #e2c58b 30%, #c2ce9c 64%, #7edbdc 100%)"
+  },
+  {
+    id: "multicolor-blend",
+    name: "Multicolor Blend",
+    value: "linear-gradient(to right, #eea2a2 0%, #bbc1bf 19%, #57c6e1 42%, #b49fda 79%, #7ac5d8 100%)",
+    preview: "linear-gradient(to right, #eea2a2 0%, #bbc1bf 19%, #57c6e1 42%, #b49fda 79%, #7ac5d8 100%)"
+  },
+  {
+    id: "purple-mono",
+    name: "Purple Mono",
+    value: "linear-gradient(to top, #a7a6cb 0%, #8989ba 52%, #8989ba 100%)",
+    preview: "linear-gradient(to top, #a7a6cb 0%, #8989ba 52%, #8989ba 100%)"
+  },
+  {
+    id: "pink-coral",
+    name: "Pink Coral",
+    value: "linear-gradient(to right, #ff758c 0%, #ff7eb3 100%)",
+    preview: "linear-gradient(to right, #ff758c 0%, #ff7eb3 100%)"
+  },
+  {
+    id: "olive-gold",
+    name: "Olive Gold",
+    value: "linear-gradient(to right, #c1c161 0%, #c1c161 0%, #d4d4b1 100%)",
+    preview: "linear-gradient(to right, #c1c161 0%, #c1c161 0%, #d4d4b1 100%)"
+  },
+  {
+    id: "blue-sky",
+    name: "Blue Sky",
+    value: "linear-gradient(-225deg, #5D9FFF 0%, #B8DCFF 48%, #6BBBFF 100%)",
+    preview: "linear-gradient(-225deg, #5D9FFF 0%, #B8DCFF 48%, #6BBBFF 100%)"
+  },
+  {
+    id: "neon-mix",
+    name: "Neon Mix",
+    value: "linear-gradient(-225deg, #69EACB 0%, #EACCF8 48%, #6654F1 100%)",
+    preview: "linear-gradient(-225deg, #69EACB 0%, #EACCF8 48%, #6654F1 100%)"
   }
 ];
 
@@ -248,106 +464,107 @@ const App: React.FC = () => {
     };
   }, []);
 
-// applystyle section
-const applyStyle = async (property: string, value: string) => {
-  const element = await webflow.getSelectedElement();
-  if (!element) {
-    alert("No element selected. Please select an element in the Webflow Designer.");
-    return;
-  }
 
-  setIsApplying(true);
-  try {
-    if (!element.styles) {
-      alert("This element does not support styles.");
+  // applystyle section
+  const applyStyle = async (property: string, value: string) => {
+    const element = await webflow.getSelectedElement();
+    if (!element) {
+      alert("No element selected. Please select an element in the Webflow Designer.");
       return;
     }
 
-    const styles = await element.getStyles();
-    
-    // Check if styles is iterable (array)
-    let stylesArray = [];
-    if (Array.isArray(styles)) {
-      stylesArray = styles;
-    } else if (styles && typeof styles[Symbol.iterator] === 'function') {
-      // Convert iterable to array
-      stylesArray = Array.from(styles);
-    } else {
-      // If it's not iterable, create empty array
-      stylesArray = [];
-    }
-
-    let targetStyle = null;
-    let existingStyleWithProperty = null;
-
-    // First, check if any existing style already has this property
-    for (const style of stylesArray) {
-      const properties = await style.getProperties();
-      if (properties && property in properties) {
-        existingStyleWithProperty = style;
-        break;
+    setIsApplying(true);
+    try {
+      if (!element.styles) {
+        alert("This element does not support styles.");
+        return;
       }
-    }
 
-    // If we found an existing style with this property, use it
-    if (existingStyleWithProperty) {
-      targetStyle = existingStyleWithProperty;
-    } 
-    // If no existing style has this property, check if element has only one style (likely a combo class)
-    else if (stylesArray.length === 1) {
-      targetStyle = stylesArray[0];
-    }
-    // If element has multiple styles but none have this property, create a new one
-    else {
-      let baseStyleName = property.replace('-', '_') + '_style';
-      let styleName = baseStyleName;
-      let count = 1;
-      let nameIsUnique = false;
+      const styles = await element.getStyles();
 
-      while (!nameIsUnique) {
-        try {
-          const existingStyle = await webflow.getStyleByName(styleName);
-          if (existingStyle) {
-            styleName = `${baseStyleName}-${count}`;
-            count++;
-          } else {
-            nameIsUnique = true;
-          }
-        } catch (error: any) {
-          if (error.code === 404) {
-            nameIsUnique = true;
-          } else {
-            console.error("Error checking for existing style:", error);
-            styleName = `${property}-${Date.now()}`;
-            nameIsUnique = true;
-          }
+      // Check if styles is iterable (array)
+      let stylesArray = [];
+      if (Array.isArray(styles)) {
+        stylesArray = styles;
+      } else if (styles && typeof styles[Symbol.iterator] === 'function') {
+        // Convert iterable to array
+        stylesArray = Array.from(styles);
+      } else {
+        // If it's not iterable, create empty array
+        stylesArray = [];
+      }
+
+      let targetStyle = null;
+      let existingStyleWithProperty = null;
+
+      // First, check if any existing style already has this property
+      for (const style of stylesArray) {
+        const properties = await style.getProperties();
+        if (properties && property in properties) {
+          existingStyleWithProperty = style;
+          break;
         }
       }
 
-      const newStyle = await webflow.createStyle(styleName);
-      await newStyle.setProperties({ [property]: value });
-      
-      // Combine existing styles with new style
-      const updatedStyles = [...stylesArray, newStyle];
-      await element.setStyles(updatedStyles);
-      targetStyle = newStyle;
-    }
+      // If we found an existing style with this property, use it
+      if (existingStyleWithProperty) {
+        targetStyle = existingStyleWithProperty;
+      }
+      // If no existing style has this property, check if element has only one style (likely a combo class)
+      else if (stylesArray.length === 1) {
+        targetStyle = stylesArray[0];
+      }
+      // If element has multiple styles but none have this property, create a new one
+      else {
+        let baseStyleName = property.replace('-', '_') + '_style';
+        let styleName = baseStyleName;
+        let count = 1;
+        let nameIsUnique = false;
 
-    // Apply the property value to the target style
-    if (targetStyle) {
-      const currentProperties = await targetStyle.getProperties();
-      const newProperties = { ...currentProperties, [property]: value };
-      await targetStyle.setProperties(newProperties);
-    }
+        while (!nameIsUnique) {
+          try {
+            const existingStyle = await webflow.getStyleByName(styleName);
+            if (existingStyle) {
+              styleName = `${baseStyleName}-${count}`;
+              count++;
+            } else {
+              nameIsUnique = true;
+            }
+          } catch (error: any) {
+            if (error.code === 404) {
+              nameIsUnique = true;
+            } else {
+              console.error("Error checking for existing style:", error);
+              styleName = `${property}-${Date.now()}`;
+              nameIsUnique = true;
+            }
+          }
+        }
 
-    console.log(`Applied ${property}: ${value}`);
-  } catch (error) {
-    console.error(`Error applying ${property}:`, error);
-    alert(`Failed to apply the ${property}. Please try again. Check the console for details.`);
-  } finally {
-    setIsApplying(false);
-  }
-};
+        const newStyle = await webflow.createStyle(styleName);
+        await newStyle.setProperties({ [property]: value });
+
+        // Combine existing styles with new style
+        const updatedStyles = [...stylesArray, newStyle];
+        await element.setStyles(updatedStyles);
+        targetStyle = newStyle;
+      }
+
+      // Apply the property value to the target style
+      if (targetStyle) {
+        const currentProperties = await targetStyle.getProperties();
+        const newProperties = { ...currentProperties, [property]: value };
+        await targetStyle.setProperties(newProperties);
+      }
+
+      console.log(`Applied ${property}: ${value}`);
+    } catch (error) {
+      console.error(`Error applying ${property}:`, error);
+      alert(`Failed to apply the ${property}. Please try again. Check the console for details.`);
+    } finally {
+      setIsApplying(false);
+    }
+  };
 
   // Functions to apply presets and custom values
   const applyBoxPreset = async (preset: ShadowPreset) => {
@@ -389,6 +606,54 @@ const applyStyle = async (property: string, value: string) => {
 
   const applyGradientPreset = async (preset: any) => {
     await applyStyle("background-image", preset.value);
+
+    // Extract colors and positions from preset value
+    const isLinear = preset.value.includes('linear-gradient');
+    const gradientContent = preset.value.split('(')[1]?.split(')')[0];
+    const colorStops = gradientContent ? gradientContent.split(',') : [];
+
+    const colors = [];
+
+    for (const stop of colorStops) {
+      const trimmedStop = stop.trim();
+
+      // Extract color (supports hex, rgb, rgba)
+      const colorMatch = trimmedStop.match(/#[a-fA-F0-9]{6}|#[a-fA-F0-9]{3}|rgb\([^)]+\)|rgba\([^)]+\)/);
+
+      // Extract position percentage
+      const positionMatch = trimmedStop.match(/(\d+)%/);
+
+      if (colorMatch) {
+        const color = colorMatch[0];
+        const position = positionMatch ? parseInt(positionMatch[1]) : colors.length * 50;
+
+        colors.push({
+          color: color,
+          position: position
+        });
+      }
+    }
+
+    // If no colors extracted, use default
+    if (colors.length === 0) {
+      colors.push(
+        { color: "#6e8efb", position: 0 },
+        { color: "#a777e3", position: 100 }
+      );
+    }
+
+    // Extract angle for linear gradients
+    let angle = 90;
+    if (isLinear) {
+      const angleMatch = preset.value.match(/linear-gradient\((\d+)deg/);
+      angle = angleMatch ? parseInt(angleMatch[1]) : 90;
+    }
+
+    setGradientControls({
+      type: isLinear ? "linear" : "radial",
+      angle: angle,
+      colors: colors
+    });
   };
 
   const applyCustomBoxShadow = async () => {
@@ -478,38 +743,38 @@ const applyStyle = async (property: string, value: string) => {
     updateGradientControl("colors", newColors);
   };
 
- const resetControls = async () => {
-  if (!selectedElement) return;
+  const resetControls = async () => {
+    if (!selectedElement) return;
 
-  setIsApplying(true);
-  try {
-    if (activeTab === "box") {
-      // Reset to default values in UI
-      setBoxControls(defaultBoxControls);
-      // Remove box-shadow completely
-      await applyStyle("box-shadow", "none");
-    }
+    setIsApplying(true);
+    try {
+      if (activeTab === "box") {
+        // Reset to default values in UI
+        setBoxControls(defaultBoxControls);
+        // Remove box-shadow completely
+        await applyStyle("box-shadow", "none");
+      }
 
-    if (activeTab === "text") {
-      // Reset to default values in UI
-      setTextControls(defaultTextControls);
-      // Remove text-shadow completely
-      await applyStyle("text-shadow", "none");
-    }
+      if (activeTab === "text") {
+        // Reset to default values in UI
+        setTextControls(defaultTextControls);
+        // Remove text-shadow completely
+        await applyStyle("text-shadow", "none");
+      }
 
-    if (activeTab === "background") {
-      // Reset to default values in UI
-      setGradientControls(defaultGradientControls);
-      // Remove background-image completely
-      await applyStyle("background-image", "none");
+      if (activeTab === "background") {
+        // Reset to default values in UI
+        setGradientControls(defaultGradientControls);
+        // Remove background-image completely
+        await applyStyle("background-image", "none");
+      }
+    } catch (error) {
+      console.error("Error resetting controls:", error);
+      alert("Failed to reset. Please try again.");
+    } finally {
+      setIsApplying(false);
     }
-  } catch (error) {
-    console.error("Error resetting controls:", error);
-    alert("Failed to reset. Please try again.");
-  } finally {
-    setIsApplying(false);
-  }
-};
+  };
 
 
   // const copyCSSCode = () => {
@@ -598,7 +863,7 @@ const applyStyle = async (property: string, value: string) => {
         textShadow: 'none'
       };
       const code = `box-shadow: ${style.boxShadow};`;
-      return { style, code, text: null };
+      return { style, code, text: "Webflow" }; // ✅ Changed from null to "Webflow"
     } else if (activeTab === "text") {
       const { x, y, blur, color, opacity } = textControls;
       const rgbColor = hexToRgb(color);
@@ -608,18 +873,25 @@ const applyStyle = async (property: string, value: string) => {
         backgroundImage: 'none'
       };
       const code = `text-shadow: ${style.textShadow};`;
-      return { style, code, text: "Text" };
+      return { style, code, text: "Webflow" }; // ✅ Changed from "Text" to "Webflow"
     } else { // background
       const { type, angle, colors } = gradientControls;
+
+      // Debug log
+      console.log("Current gradient controls:", { type, angle, colors });
+
       const colorStops = colors.map(c => `${c.color} ${c.position}%`).join(', ');
       const gradientValue = `${type}-gradient(${type === 'linear' ? `${angle}deg` : 'circle'}, ${colorStops})`;
+
+      console.log("Generated gradient value:", gradientValue);
+
       const style = {
         backgroundImage: gradientValue,
         boxShadow: 'none',
         textShadow: 'none'
       };
       const code = `background-image: ${gradientValue};`;
-      return { style, code, text: null };
+      return { style, code, text: "Webflow" }; // ✅ Changed from null to "Webflow"
     }
   };
 
@@ -677,10 +949,9 @@ const applyStyle = async (property: string, value: string) => {
           className="w-24 h-24 bg-white rounded-xl transition-all duration-300 flex items-center justify-center text-xs font-semibold"
           style={previewStyle}
         >
-          {previewTextContent && <span id="previewText">{previewTextContent}</span>}
+          <span id="previewText">Webflow</span> {/* ✅ Directly use "Webflow" text */}
         </div>
       </div>
-
       {/* Presets / Custom */}
       <div className="flex gap-1 m-2">
         <button
@@ -932,14 +1203,14 @@ const applyStyle = async (property: string, value: string) => {
 
       {/* Footer */}
       <footer className="p-2 bg-gray-900 text-white flex gap-1">
-       <button
-    id="resetButton"
-    className="flex-1 py-1 text-xs bg-gray-700 rounded hover:bg-gray-600"
-    onClick={resetControls}  
-    disabled={isApplying}
-  >
-    Reset
-  </button>
+        <button
+          id="resetButton"
+          className="flex-1 py-1 text-xs bg-gray-700 rounded hover:bg-gray-600"
+          onClick={resetControls}
+          disabled={isApplying}
+        >
+          Reset
+        </button>
         <button
           id="copyButton"
           className={`flex-1 py-1 text-xs rounded hover:bg-blue-700 transition-colors ${copied ? 'bg-green-600' : 'bg-blue-600'}`}
