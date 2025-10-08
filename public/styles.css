@@ -556,7 +556,7 @@ input[type="color"]::-webkit-color-swatch {
   to { transform: rotate(360deg); }
 }
 
-/* Add these to your existing styles.css */
+
 
  .main-tabs {
   margin-top: 0;
@@ -698,7 +698,7 @@ input[type="color"]::-webkit-color-swatch {
   z-index: 1;
 }
 
-/* Hover State */
+
 .grad-pos:hover::-webkit-slider-thumb {
   background: #5a4a8c;
   transform: scale(1.1);
@@ -711,7 +711,6 @@ input[type="color"]::-webkit-color-swatch {
   box-shadow: 0px 2px 6px rgba(0, 0, 0, 0.3), 0px 3px 8px rgba(0, 0, 0, 0.15);
 }
 
-/* Focus State */
 .grad-pos:focus::-webkit-slider-thumb {
   background: #7c6aa8;
   border-color: white;
@@ -728,7 +727,7 @@ input[type="color"]::-webkit-color-swatch {
   transform: scale(1.15);
 }
 
-/* Active State */
+
 .grad-pos:active::-webkit-slider-thumb {
   background: #5a4a8c;
   transform: scale(1.05);
