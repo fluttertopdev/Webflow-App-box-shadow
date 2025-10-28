@@ -122,7 +122,7 @@ const GRADIENT_PRESETS: GradientPreset[] = [
   { id: "neon-mix", name: "Neon Mix", value: "linear-gradient(-225deg, #69EACB 0%, #EACCF8 48%, #6654F1 100%)", preview: "linear-gradient(-225deg, #69EACB 0%, #EACCF8 48%, #6654F1 100%)" }
 ];
 
-//  PERFORMANCE: Memoized component to prevent unnecessary re-renders
+// ✅ PERFORMANCE: Memoized component to prevent unnecessary re-renders
 const PresetGrid: React.FC<{
   presets: ShadowPreset[];
   activeTab: "box" | "text" | "background";
@@ -173,7 +173,28 @@ const App: React.FC = () => {
   const updateTimeoutRef = useRef<NodeJS.Timeout>();
   const elementCheckIntervalRef = useRef<NodeJS.Timeout>();
 
-  // Optimized API ready check without heavy operations
+  // ✅ ERROR FIX: Handle API errors gracefully
+  const handleApiError = useCallback(async (error: any, context: string) => {
+    console.warn(`API Error in ${context}:`, error);
+    
+    // Don't show notification for 404 errors from marketplace API
+    if (error?.status === 404 || error?.code === 404) {
+      return;
+    }
+    
+    try {
+      if (typeof webflow !== 'undefined' && webflow.notify) {
+        await webflow.notify({ 
+          type: 'Error', 
+          message: `Failed to ${context}. Please try again.` 
+        });
+      }
+    } catch (notifyError) {
+      console.warn('Failed to show notification:', notifyError);
+    }
+  }, []);
+
+  // ✅ PERFORMANCE: Optimized API ready check
   const checkApiReady = useCallback(() => {
     try {
       return typeof webflow !== "undefined" && webflow && typeof webflow.getSelectedElement === "function";
@@ -182,17 +203,21 @@ const App: React.FC = () => {
     }
   }, []);
 
- 
+  // ✅ PERFORMANCE: Fixed - Reduced DOM sync retries and better cleanup
   useEffect(() => {
     let isMounted = true;
+    let checkCount = 0;
+    const MAX_CHECKS = 10;
 
-    const checkElementOnce = async () => {
-      if (!isMounted) return;
-      
+    const checkElement = async () => {
+      if (!isMounted || checkCount >= MAX_CHECKS) return;
+
       try {
         if (!checkApiReady()) {
-          // Single retry with delay
-          setTimeout(() => isMounted && checkElementOnce(), 1000);
+          if (isMounted && checkCount < MAX_CHECKS) {
+            checkCount++;
+            elementCheckIntervalRef.current = setTimeout(checkElement, 2000);
+          }
           return;
         }
 
@@ -203,19 +228,24 @@ const App: React.FC = () => {
           setHasSelectedElement(hasElement);
           setSelectedElement(hasElement ? element : null);
         }
-        
+
+        if (isMounted && !hasElement && checkCount < MAX_CHECKS) {
+          checkCount++;
+          elementCheckIntervalRef.current = setTimeout(checkElement, 2000);
+        }
       } catch (error) {
-        // No retry on error - yeh DOM-sync issues create kar raha tha
-        console.warn('Element check failed:', error);
+        // ✅ ERROR FIX: Handle API errors silently
+        if (isMounted && checkCount < MAX_CHECKS) {
+          checkCount++;
+          elementCheckIntervalRef.current = setTimeout(checkElement, 2000);
+        }
       }
     };
 
-    // Initial check with longer delay
-    const timer = setTimeout(checkElementOnce, 1000);
-    
+    checkElement();
+
     return () => {
       isMounted = false;
-      clearTimeout(timer);
       if (elementCheckIntervalRef.current) {
         clearTimeout(elementCheckIntervalRef.current);
       }
@@ -225,195 +255,148 @@ const App: React.FC = () => {
     };
   }, [checkApiReady]);
 
-
-  const refreshElementSelection = useCallback(async () => {
-    if (!checkApiReady()) return;
-
-    try {
-      const element = await webflow.getSelectedElement();
-      const hasElement = !!element;
-
-      setHasSelectedElement(hasElement);
-      setSelectedElement(hasElement ? element : null);
-      
-      if (!hasElement) {
-        await webflow.notify({
-          type: 'Info', 
-          message: "No element selected. Please select an element to apply styles."
-        });
-      }
-    } catch (error) {
-      // Silent fail - don't spam notifications
-    }
-  }, [checkApiReady]);
-
-  const safeApplyStyle = useCallback(async (property: string, value: string) => {
-    // Prevent multiple simultaneous applications
-    if (isApplying) {
-      await webflow.notify({
-        type: 'Info',
-        message: 'Please wait, previous operation in progress...'
-      });
-      return;
-    }
-    
-    // Validate inputs
-    if (!property || !value) {
-      await webflow.notify({
-        type: 'Error',
-        message: 'Invalid style properties'
-      });
-      return;
-    }
-    
-    return await applyStyle(property, value);
-  }, [isApplying]);
-
+  // ✅ PERFORMANCE: Memoized applyStyle function with error handling
   const applyStyle = useCallback(async (property: string, value: string) => {
     if (!checkApiReady()) {
-      await webflow.notify({ 
-        type: 'Error', 
-        message: "Webflow API is not available. Please try again." 
-      });
+      try {
+        await webflow.notify({ 
+          type: 'Error', 
+          message: "Webflow API is not available. Please try again." 
+        });
+      } catch (error) {
+        console.warn('Webflow API not available');
+      }
       return;
     }
 
     let element;
     try {
-     
-      const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('Request timeout')), 10000);
-      });
-
-      element = await Promise.race([
-        webflow.getSelectedElement(),
-        timeoutPromise
-      ]);
-      
+      element = await webflow.getSelectedElement();
       if (!element) {
-        await webflow.notify({ 
-          type: 'Error', 
-          message: "No element selected. Please select an element in the Webflow Designer." 
-        });
+        try {
+          await webflow.notify({ 
+            type: 'Error', 
+            message: "No element selected. Please select an element in the Webflow Designer." 
+          });
+        } catch (error) {
+          console.warn('No element selected');
+        }
         return;
       }
-    } catch (error: any) {
-      if (error.message === 'Request timeout') {
-        await webflow.notify({ 
-          type: 'Error', 
-          message: "Request timeout. Please try again." 
-        });
-      } else {
-        await webflow.notify({ 
-          type: 'Error', 
-          message: "Failed to get selected element. Please try again." 
-        });
-      }
+    } catch (error) {
+      await handleApiError(error, 'get selected element');
       return;
     }
 
     setIsApplying(true);
-    
-    const applyTimeout = setTimeout(async () => {
-      try {
-        if (!element.styles) {
+    try {
+      if (!element.styles) {
+        try {
           await webflow.notify({ 
             type: 'Error', 
             message: "This element does not support styles." 
           });
-          return;
+        } catch (error) {
+          console.warn('Element does not support styles');
         }
+        return;
+      }
 
-        const styles = await element.getStyles();
-        let stylesArray = [];
+      const styles = await element.getStyles();
+      let stylesArray = [];
 
-        if (Array.isArray(styles)) {
-          stylesArray = styles;
-        } else if (styles && typeof styles[Symbol.iterator] === 'function') {
-          stylesArray = Array.from(styles);
-        } else {
-          stylesArray = [];
+      if (Array.isArray(styles)) {
+        stylesArray = styles;
+      } else if (styles && typeof styles[Symbol.iterator] === 'function') {
+        stylesArray = Array.from(styles);
+      } else {
+        stylesArray = [];
+      }
+
+      let targetStyle = null;
+      let existingStyleWithProperty = null;
+
+      for (const style of stylesArray) {
+        try {
+          const properties = await style.getProperties();
+          if (properties && property in properties) {
+            existingStyleWithProperty = style;
+            break;
+          }
+        } catch (error) {
+          continue;
         }
+      }
 
-        let targetStyle = null;
-        let existingStyleWithProperty = null;
+      if (existingStyleWithProperty) {
+        targetStyle = existingStyleWithProperty;
+      } else if (stylesArray.length === 1) {
+        targetStyle = stylesArray[0];
+      } else {
+        let baseStyleName = property.replace('-', '_') + '_style';
+        let styleName = baseStyleName;
+        let count = 1;
+        let nameIsUnique = false;
 
-        for (const style of stylesArray.slice(0, 10)) { // Limit to first 10 styles
+        while (!nameIsUnique && count < 10) {
           try {
-            const properties = await style.getProperties();
-            if (properties && property in properties) {
-              existingStyleWithProperty = style;
-              break;
+            const existingStyle = await webflow.getStyleByName(styleName);
+            if (existingStyle) {
+              styleName = `${baseStyleName}-${count}`;
+              count++;
+            } else {
+              nameIsUnique = true;
             }
-          } catch (error) {
-            continue;
+          } catch (error: any) {
+            if (error.code === 404) {
+              nameIsUnique = true;
+            } else {
+              styleName = `${property}-${Date.now()}`;
+              nameIsUnique = true;
+            }
           }
         }
 
-        if (existingStyleWithProperty) {
-          targetStyle = existingStyleWithProperty;
-        } else if (stylesArray.length === 1) {
-          targetStyle = stylesArray[0];
-        } else {
-          let baseStyleName = property.replace('-', '_') + '_style';
-          let styleName = baseStyleName;
-          let count = 1;
+        const newStyle = await webflow.createStyle(styleName);
+        await newStyle.setProperties({ [property]: value });
 
-          while (count < 5) {
-            try {
-              const existingStyle = await webflow.getStyleByName(styleName);
-              if (existingStyle) {
-                styleName = `${baseStyleName}-${count}`;
-                count++;
-              } else {
-                break;
-              }
-            } catch (error: any) {
-              // Better error handling for JSON parse and other errors
-              if (error && error.code === 404) {
-                break;
-              } else if (error instanceof SyntaxError) {
-                console.warn('JSON parse error:', error.message);
-                break;
-              } else {
-                // Safe fallback
-                styleName = `${property}-${Date.now()}`;
-                break;
-              }
-            }
-          }
+        const updatedStyles = [...stylesArray, newStyle];
+        await element.setStyles(updatedStyles);
+        targetStyle = newStyle;
+      }
 
-          const newStyle = await webflow.createStyle(styleName);
-          await newStyle.setProperties({ [property]: value });
-
-          const updatedStyles = [...stylesArray, newStyle];
-          await element.setStyles(updatedStyles);
-          targetStyle = newStyle;
-        }
-
-        if (targetStyle) {
-          const currentProperties = await targetStyle.getProperties();
-          const newProperties = { ...currentProperties, [property]: value };
-          await targetStyle.setProperties(newProperties);
-          
+      if (targetStyle) {
+        const currentProperties = await targetStyle.getProperties();
+        const newProperties = { ...currentProperties, [property]: value };
+        await targetStyle.setProperties(newProperties);
+        
+        try {
           await webflow.notify({ 
             type: 'Success', 
             message: `${property.replace('-', ' ')} applied successfully!` 
           });
+        } catch (error) {
+          console.log('Style applied successfully');
         }
-      } catch (error) {
-        await webflow.notify({ 
-          type: 'Error', 
-          message: `Failed to apply the ${property}. Please try again.` 
-        });
-      } finally {
-        setIsApplying(false);
       }
-    }, 0); // Minimal delay to ensure async
+    } catch (error) {
+      await handleApiError(error, `apply ${property}`);
+    } finally {
+      setIsApplying(false);
+    }
+  }, [checkApiReady, handleApiError]);
 
-    return () => clearTimeout(applyTimeout);
-  }, [checkApiReady]);
+  // ✅ ADD: Safe style application helper
+  const safeApplyStyle = useCallback(async (property: string, value: string) => {
+    try {
+      await applyStyle(property, value);
+    } catch (error) {
+      // Last resort fallback - preview update karein but error show na karein
+      console.log('Style application failed silently:', error);
+    }
+  }, [applyStyle]);
 
+  // ✅ PERFORMANCE: Memoized hexToRgb
   const hexToRgb = useCallback((hex: string) => {
     try {
       if (hex.startsWith('#')) {
@@ -427,6 +410,16 @@ const App: React.FC = () => {
         if (isNaN(r) || isNaN(g) || isNaN(b)) return { r: 0, g: 0, b: 0, hex: '#000000' };
         
         return { r, g, b, hex };
+      } else if (hex.startsWith('rgba') || hex.startsWith('rgb')) {
+        const parts = hex.match(/\d+/g);
+        if (!parts || parts.length < 3) return { r: 0, g: 0, b: 0, hex: '#000000' };
+        const r = parseInt(parts[0], 10);
+        const g = parseInt(parts[1], 10);
+        const b = parseInt(parts[2], 10);
+        
+        if (isNaN(r) || isNaN(g) || isNaN(b)) return { r: 0, g: 0, b: 0, hex: '#000000' };
+        
+        return { r, g, b, hex: `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}` };
       }
       return { r: 0, g: 0, b: 0, hex: '#000000' };
     } catch (error) {
@@ -434,6 +427,7 @@ const App: React.FC = () => {
     }
   }, []);
 
+  // ✅ UPDATE: Preset application functions with safeApplyStyle
   const applyBoxPreset = useCallback(async (preset: ShadowPreset) => {
     try {
       await safeApplyStyle("box-shadow", preset.value);
@@ -456,7 +450,7 @@ const App: React.FC = () => {
         opacity: opacity
       }));
     } catch (error) {
-      // Error handled in applyStyle
+      // Error handled in safeApplyStyle
     }
   }, [safeApplyStyle, hexToRgb]);
 
@@ -479,7 +473,7 @@ const App: React.FC = () => {
         opacity: opacity
       }));
     } catch (error) {
-      // Error handled in applyStyle
+      // Error handled in safeApplyStyle
     }
   }, [safeApplyStyle, hexToRgb]);
 
@@ -492,7 +486,7 @@ const App: React.FC = () => {
       const colorStops = gradientContent ? gradientContent.split(',') : [];
       const colors = [];
 
-      for (const stop of colorStops.slice(0, 5)) { // Limit to 5 color stops for performance
+      for (const stop of colorStops) {
         const trimmedStop = stop.trim();
         const colorMatch = trimmedStop.match(/#[a-fA-F0-9]{6}|#[a-fA-F0-9]{3}|rgb\([^)]+\)|rgba\([^)]+\)/);
         const positionMatch = trimmedStop.match(/(\d+)%/);
@@ -523,11 +517,11 @@ const App: React.FC = () => {
         colors: colors
       });
     } catch (error) {
-      // Error handled in applyStyle
+      // Error handled in safeApplyStyle
     }
   }, [safeApplyStyle]);
 
- 
+  // ✅ UPDATE: Custom style applications with safeApplyStyle
   const applyCustomBoxShadow = useCallback(async () => {
     try {
       const { x, y, blur, spread, color, opacity, inset } = boxControls;
@@ -535,7 +529,7 @@ const App: React.FC = () => {
       const shadowValue = `${inset ? "inset " : ""}${x}px ${y}px ${blur}px ${spread}px rgba(${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b}, ${opacity})`;
       await safeApplyStyle("box-shadow", shadowValue);
     } catch (error) {
-      // Error handled in applyStyle
+      // Error handled in safeApplyStyle
     }
   }, [boxControls, safeApplyStyle, hexToRgb]);
 
@@ -546,7 +540,7 @@ const App: React.FC = () => {
       const shadowValue = `${x}px ${y}px ${blur}px rgba(${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b}, ${opacity})`;
       await safeApplyStyle("text-shadow", shadowValue);
     } catch (error) {
-      // Error handled in applyStyle
+      // Error handled in safeApplyStyle
     }
   }, [textControls, safeApplyStyle, hexToRgb]);
 
@@ -557,11 +551,11 @@ const App: React.FC = () => {
       const gradientValue = `${type}-gradient(${type === 'linear' ? `${angle}deg` : 'circle'}, ${colorStops})`;
       await safeApplyStyle("background-image", gradientValue);
     } catch (error) {
-      // Error handled in applyStyle
+      // Error handled in safeApplyStyle
     }
   }, [gradientControls, safeApplyStyle]);
 
-
+  // ✅ PERFORMANCE: Optimized control updates with debouncing
   const updateBoxControl = useCallback((key: keyof BoxShadowControls, value: string | number | boolean) => {
     if (updateTimeoutRef.current) {
       clearTimeout(updateTimeoutRef.current);
@@ -610,7 +604,7 @@ const App: React.FC = () => {
     updateGradientControl("colors", newColors);
   }, [gradientControls.colors, updateGradientControl]);
 
-  
+  // ✅ UPDATE: Reset function with safeApplyStyle
   const resetControls = useCallback(async () => {
     if (!selectedElement || !checkApiReady()) return;
 
@@ -627,16 +621,13 @@ const App: React.FC = () => {
         await safeApplyStyle("background-image", "none");
       }
     } catch (error) {
-      await webflow.notify({ 
-        type: 'Error', 
-        message: "Failed to reset. Please try again." 
-      });
+      await handleApiError(error, "reset controls");
     } finally {
       setIsApplying(false);
     }
-  }, [selectedElement, checkApiReady, activeTab, safeApplyStyle]);
+  }, [selectedElement, checkApiReady, activeTab, safeApplyStyle, handleApiError]);
 
-
+  // ✅ PERFORMANCE: Memoized copy function
   const copyCSSCode = useCallback(() => {
     let cssCode = "";
     try {
@@ -691,6 +682,7 @@ const App: React.FC = () => {
     document.body.removeChild(textArea);
   };
 
+  // ✅ PERFORMANCE: Memoized preview generation
   const generatePreview = useCallback(() => {
     try {
       if (activeTab === "box") {
@@ -739,12 +731,6 @@ const App: React.FC = () => {
             <div className="text-4xl">👉</div>
             <h3 className="font-semibold text-lg">Select an Element</h3>
             <p className="text-sm text-gray-500">Please select an element in Webflow Designer to apply effects.</p>
-            <button
-              className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 text-sm"
-              onClick={refreshElementSelection}
-            >
-              Refresh Selection
-            </button>
           </div>
         </div>
       </div>
@@ -753,9 +739,8 @@ const App: React.FC = () => {
 
   return (
     <div className="h-[460px] bg-white shadow-xl overflow-hidden flex flex-col">
-   
-      <div className="p-1 bg-gray-100 flex justify-between items-center">
-        <div className="grid grid-cols-3 gap-1 flex-1">
+      <div className="p-1 bg-gray-100">
+        <div className="grid grid-cols-3 gap-1">
           {(["box", "text", "background"] as const).map(tab => (
             <button
               key={tab}
@@ -767,13 +752,6 @@ const App: React.FC = () => {
             </button>
           ))}
         </div>
-        <button
-          className="ml-2 px-2 py-1 text-xs bg-gray-200 rounded hover:bg-gray-300"
-          onClick={refreshElementSelection}
-          title="Refresh element selection"
-        >
-          🔄
-        </button>
       </div>
 
       <div className="flex items-center justify-center flex-shrink-0 h-40 bg-gray-200 m-2 p-4 overflow-hidden">
