@@ -194,7 +194,7 @@ const App: React.FC = () => {
     }
   }, []);
 
-  // ✅ PERFORMANCE: Optimized API ready check
+  
   const checkApiReady = useCallback(() => {
     try {
       return typeof webflow !== "undefined" && webflow && typeof webflow.getSelectedElement === "function";
