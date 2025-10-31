@@ -122,43 +122,57 @@ const GRADIENT_PRESETS: GradientPreset[] = [
   { id: "neon-mix", name: "Neon Mix", value: "linear-gradient(-225deg, #69EACB 0%, #EACCF8 48%, #6654F1 100%)", preview: "linear-gradient(-225deg, #69EACB 0%, #EACCF8 48%, #6654F1 100%)" }
 ];
 
-// ✅ PERFORMANCE: Memoized component to prevent unnecessary re-renders
 const PresetGrid: React.FC<{
   presets: ShadowPreset[];
   activeTab: "box" | "text" | "background";
   onApplyBoxPreset: (preset: ShadowPreset) => void;
   onApplyTextPreset: (preset: ShadowPreset) => void;
   onApplyGradientPreset: (preset: GradientPreset) => void;
-}> = React.memo(({ presets, activeTab, onApplyBoxPreset, onApplyTextPreset, onApplyGradientPreset }) => (
+  currentAppliedStyle?: string;
+}> = React.memo(({ presets, activeTab, onApplyBoxPreset, onApplyTextPreset, onApplyGradientPreset, currentAppliedStyle }) => (
   <div className="grid grid-cols-3 gap-2 overflow-hidden">
-    {presets.map(preset => (
-      <div key={preset.id} className="overflow-hidden rounded-lg">
-        <button
-          className="preset-card p-1 bg-white border border-gray-200 border-solid hover:shadow-md transition-shadow w-full h-full"
-          onClick={() => {
-            if (activeTab === 'box') onApplyBoxPreset(preset);
-            else if (activeTab === 'text') onApplyTextPreset(preset);
-            else if (activeTab === 'background') onApplyGradientPreset(preset as GradientPreset);
-          }}
-        >
-          <div
-            className="h-16 rounded-md flex items-center justify-center text-[11px] mx-auto"
-            style={
-              activeTab === 'box' ? { boxShadow: preset.preview, width: '80%' } :
-                activeTab === 'text' ? { textShadow: preset.preview, width: '80%' } :
-                  { backgroundImage: preset.preview, width: '80%' }
-            }
+    {presets.map(preset => {
+      const isApplied = currentAppliedStyle === preset.value;
+      return (
+        <div key={preset.id} className="overflow-hidden rounded-lg">
+          <button
+            className={`preset-card p-1 border border-solid transition-shadow w-full h-full ${isApplied
+              ? 'bg-green-100 border-green-500 cursor-not-allowed'
+              : 'bg-white border-gray-200 hover:shadow-md'
+              }`}
+            onClick={() => {
+              if (!isApplied) {
+                if (activeTab === 'box') onApplyBoxPreset(preset);
+                else if (activeTab === 'text') onApplyTextPreset(preset);
+                else if (activeTab === 'background') onApplyGradientPreset(preset as GradientPreset);
+              }
+            }}
+            disabled={isApplied}
           >
-            {activeTab === 'text' && 'Webflow'}
-          </div>
-          <div className="mt-1 text-[11px] text-center px-1">{preset.name}</div>
-        </button>
-      </div>
-    ))}
+            <div
+              className="h-16 rounded-md flex items-center justify-center text-[11px] mx-auto relative"
+              style={
+                activeTab === 'box' ? { boxShadow: preset.value, width: '80%' } :
+                  activeTab === 'text' ? { textShadow: preset.value, width: '80%' } :
+                    { backgroundImage: preset.value, width: '80%' }
+              }
+            >
+              {activeTab === 'text' && 'Webflow'}
+              {isApplied && <div className="absolute top-1 right-1 w-2 h-2 bg-green-500 rounded-full"></div>}
+            </div>
+            <div className="mt-1 text-[11px] text-center px-1">{preset.name}</div>
+          </button>
+        </div>
+      );
+    })}
   </div>
 ));
 
+
 const App: React.FC = () => {
+
+  
+  const [currentAppliedStyle, setCurrentAppliedStyle] = useState<string>("");
   const [hasSelectedElement, setHasSelectedElement] = useState(false);
   const [selectedElement, setSelectedElement] = useState<any>(null);
   const [activeTab, setActiveTab] = useState<"box" | "text" | "background">("box");
@@ -173,20 +187,19 @@ const App: React.FC = () => {
   const updateTimeoutRef = useRef<NodeJS.Timeout>();
   const elementCheckIntervalRef = useRef<NodeJS.Timeout>();
 
-  // ✅ ERROR FIX: Handle API errors gracefully
   const handleApiError = useCallback(async (error: any, context: string) => {
     console.warn(`API Error in ${context}:`, error);
-    
+
     // Don't show notification for 404 errors from marketplace API
     if (error?.status === 404 || error?.code === 404) {
       return;
     }
-    
+
     try {
       if (typeof webflow !== 'undefined' && webflow.notify) {
-        await webflow.notify({ 
-          type: 'Error', 
-          message: `Failed to ${context}. Please try again.` 
+        await webflow.notify({
+          type: 'Error',
+          message: `Failed to ${context}. Please try again.`
         });
       }
     } catch (notifyError) {
@@ -194,7 +207,6 @@ const App: React.FC = () => {
     }
   }, []);
 
-  
   const checkApiReady = useCallback(() => {
     try {
       return typeof webflow !== "undefined" && webflow && typeof webflow.getSelectedElement === "function";
@@ -203,7 +215,6 @@ const App: React.FC = () => {
     }
   }, []);
 
-  // ✅ PERFORMANCE: Fixed - Reduced DOM sync retries and better cleanup
   useEffect(() => {
     let isMounted = true;
     let checkCount = 0;
@@ -255,17 +266,11 @@ const App: React.FC = () => {
     };
   }, [checkApiReady]);
 
-  // ✅ PERFORMANCE: Memoized applyStyle function with error handling
+
+
   const applyStyle = useCallback(async (property: string, value: string) => {
     if (!checkApiReady()) {
-      try {
-        await webflow.notify({ 
-          type: 'Error', 
-          message: "Webflow API is not available. Please try again." 
-        });
-      } catch (error) {
-        console.warn('Webflow API not available');
-      }
+      console.warn(" Webflow API not ready");
       return;
     }
 
@@ -273,54 +278,43 @@ const App: React.FC = () => {
     try {
       element = await webflow.getSelectedElement();
       if (!element) {
-        try {
-          await webflow.notify({ 
-            type: 'Error', 
-            message: "No element selected. Please select an element in the Webflow Designer." 
-          });
-        } catch (error) {
-          console.warn('No element selected');
-        }
+        console.warn(" No element selected");
         return;
       }
     } catch (error) {
-      await handleApiError(error, 'get selected element');
+      console.error(" Error getting selected element:", error);
       return;
     }
 
     setIsApplying(true);
     try {
       if (!element.styles) {
-        try {
-          await webflow.notify({ 
-            type: 'Error', 
-            message: "This element does not support styles." 
-          });
-        } catch (error) {
-          console.warn('Element does not support styles');
-        }
+        console.warn(" Element has no styles property");
         return;
       }
 
-      const styles = await element.getStyles();
-      let stylesArray = [];
+      console.log(` Applying ${property} = "${value}" to element`);
 
-      if (Array.isArray(styles)) {
-        stylesArray = styles;
-      } else if (styles && typeof styles[Symbol.iterator] === 'function') {
-        stylesArray = Array.from(styles);
-      } else {
-        stylesArray = [];
+      const currentStyles = await element.getStyles();
+      let elementStyles = [];
+
+      if (Array.isArray(currentStyles)) {
+        elementStyles = currentStyles;
+      } else if (currentStyles && typeof currentStyles[Symbol.iterator] === 'function') {
+        elementStyles = Array.from(currentStyles);
       }
 
-      let targetStyle = null;
-      let existingStyleWithProperty = null;
+      console.log(` Found ${elementStyles.length} existing styles`);
 
-      for (const style of stylesArray) {
+      let targetStyle = null;
+      let styleName = "";
+
+      for (const style of elementStyles) {
         try {
           const properties = await style.getProperties();
           if (properties && property in properties) {
-            existingStyleWithProperty = style;
+            targetStyle = style;
+            console.log(` Found existing style with ${property}`);
             break;
           }
         } catch (error) {
@@ -328,87 +322,85 @@ const App: React.FC = () => {
         }
       }
 
-      if (existingStyleWithProperty) {
-        targetStyle = existingStyleWithProperty;
-      } else if (stylesArray.length === 1) {
-        targetStyle = stylesArray[0];
-      } else {
-        let baseStyleName = property.replace('-', '_') + '_style';
-        let styleName = baseStyleName;
-        let count = 1;
-        let nameIsUnique = false;
+      if (!targetStyle) {
+        styleName = `custom_${property}_${Date.now()}`;
+        console.log(` Creating new style: ${styleName}`);
 
-        while (!nameIsUnique && count < 10) {
-          try {
-            const existingStyle = await webflow.getStyleByName(styleName);
-            if (existingStyle) {
-              styleName = `${baseStyleName}-${count}`;
-              count++;
-            } else {
-              nameIsUnique = true;
-            }
-          } catch (error: any) {
-            if (error.code === 404) {
-              nameIsUnique = true;
-            } else {
-              styleName = `${property}-${Date.now()}`;
-              nameIsUnique = true;
-            }
-          }
+        try {
+          const newStyle = await webflow.createStyle(styleName);
+          await newStyle.setProperties({ [property]: value });
+
+          const updatedStyles = [...elementStyles, newStyle];
+          await element.setStyles(updatedStyles);
+
+          console.log(`Created and applied new style: ${styleName}`);
+        } catch (error) {
+          console.error(" Style creation failed, trying alternative:", error);
+
+          // Alternative approach
+          styleName = `element_${property}_${Math.random().toString(36).substr(2, 9)}`;
+          const newStyle = await webflow.createStyle(styleName);
+          await newStyle.setProperties({ [property]: value });
+
+          const updatedStyles = [...elementStyles, newStyle];
+          await element.setStyles(updatedStyles);
+
+          console.log(` Created alternative style: ${styleName}`);
         }
-
-        const newStyle = await webflow.createStyle(styleName);
-        await newStyle.setProperties({ [property]: value });
-
-        const updatedStyles = [...stylesArray, newStyle];
-        await element.setStyles(updatedStyles);
-        targetStyle = newStyle;
-      }
-
-      if (targetStyle) {
+      } else {
+        console.log(` Updating existing style with ${property}`);
         const currentProperties = await targetStyle.getProperties();
         const newProperties = { ...currentProperties, [property]: value };
         await targetStyle.setProperties(newProperties);
-        
-        try {
-          await webflow.notify({ 
-            type: 'Success', 
-            message: `${property.replace('-', ' ')} applied successfully!` 
-          });
-        } catch (error) {
-          console.log('Style applied successfully');
-        }
+
+        console.log(` Updated existing style with new ${property}`);
       }
+
     } catch (error) {
-      await handleApiError(error, `apply ${property}`);
+      console.error(' Style application failed:', error);
     } finally {
       setIsApplying(false);
     }
-  }, [checkApiReady, handleApiError]);
+  }, [checkApiReady]);
 
-  // ✅ ADD: Safe style application helper
+
+
   const safeApplyStyle = useCallback(async (property: string, value: string) => {
     try {
-      await applyStyle(property, value);
-    } catch (error) {
-      // Last resort fallback - preview update karein but error show na karein
-      console.log('Style application failed silently:', error);
-    }
-  }, [applyStyle]);
+      console.log(` Applying ${property}: ${value}`);
 
-  // ✅ PERFORMANCE: Memoized hexToRgb
+      await applyStyle(property, value);
+
+      console.log(` ${property} applied successfully to Webflow`);
+    } catch (error) {
+      console.error(` ${property} application failed:`, error);
+
+      try {
+        if (typeof webflow !== 'undefined' && webflow.notify) {
+          await webflow.notify({
+            type: 'Error',
+            message: `Failed to apply ${property}. Please try again.`
+          });
+        }
+      } catch (notifyError) {
+        console.warn('Failed to show notification:', notifyError);
+      }
+    }
+  }, [applyStyle]); 
+
+
   const hexToRgb = useCallback((hex: string) => {
     try {
       if (hex.startsWith('#')) {
         const h = hex.replace('#', '');
         if (h.length !== 3 && h.length !== 6) return { r: 0, g: 0, b: 0, hex: '#000000' };
-        
+
         const r = parseInt(h.length === 3 ? h[0] + h[0] : h.substring(0, 2), 16);
         const g = parseInt(h.length === 3 ? h[1] + h[1] : h.substring(2, 4), 16);
         const b = parseInt(h.length === 3 ? h[2] + h[2] : h.substring(4, 6), 16);
-        
+
         if (isNaN(r) || isNaN(g) || isNaN(b)) return { r: 0, g: 0, b: 0, hex: '#000000' };
-        
+
         return { r, g, b, hex };
       } else if (hex.startsWith('rgba') || hex.startsWith('rgb')) {
         const parts = hex.match(/\d+/g);
@@ -416,9 +408,9 @@ const App: React.FC = () => {
         const r = parseInt(parts[0], 10);
         const g = parseInt(parts[1], 10);
         const b = parseInt(parts[2], 10);
-        
+
         if (isNaN(r) || isNaN(g) || isNaN(b)) return { r: 0, g: 0, b: 0, hex: '#000000' };
-        
+
         return { r, g, b, hex: `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}` };
       }
       return { r: 0, g: 0, b: 0, hex: '#000000' };
@@ -427,111 +419,123 @@ const App: React.FC = () => {
     }
   }, []);
 
-  // ✅ UPDATE: Preset application functions with safeApplyStyle
+  const getHexColor = useCallback((color: string): string => {
+    if (color.startsWith('#')) {
+      return color.length === 7 ? color : '#000000';
+    } else if (color.startsWith('rgba') || color.startsWith('rgb')) {
+      const rgb = hexToRgb(color);
+      return rgb.hex;
+    }
+    return '#000000';
+  }, [hexToRgb]);
+
   const applyBoxPreset = useCallback(async (preset: ShadowPreset) => {
     try {
       await safeApplyStyle("box-shadow", preset.value);
-      const values = preset.value.match(/(-?\d+(\.\d+)?)px/g) || [];
-      const [x = 0, y = 0, blur = 0, spread = 0] = values.map(val => parseFloat(val));
-      
-      const isInset = preset.value.includes('inset');
-      const color = preset.value.match(/rgba?\([^)]+\)|#[\da-fA-F]{3,6}/)?.[0] || "#000000";
-      const opacityMatch = color.match(/[\d\.]+\)$/);
-      const opacity = opacityMatch ? parseFloat(opacityMatch[0]) : 0.25;
+      setCurrentAppliedStyle(preset.value);
 
-      setBoxControls(prev => ({
-        ...prev,
-        x: x || 0,
-        y: y || 0,
-        blur: blur || 0,
-        spread: spread || 0,
-        inset: isInset,
-        color: hexToRgb(color).hex,
-        opacity: opacity
-      }));
-    } catch (error) {
-      // Error handled in safeApplyStyle
-    }
-  }, [safeApplyStyle, hexToRgb]);
+      // ✅ PRESET SE CONTROLS UPDATE KARO
+      // Box shadow value parse karke controls mein set karo
+      const shadowValue = preset.value;
 
-  const applyTextPreset = useCallback(async (preset: ShadowPreset) => {
-    try {
-      await safeApplyStyle("text-shadow", preset.value);
-      const values = preset.value.match(/(-?\d+(\.\d+)?)px/g) || [];
-      const [x = 0, y = 0, blur = 0] = values.map(val => parseFloat(val));
-      
-      const color = preset.value.match(/rgba?\([^)]+\)|#[\da-fA-F]{3,6}/)?.[0] || "#000000";
-      const opacityMatch = color.match(/[\d\.]+\)$/);
-      const opacity = opacityMatch ? parseFloat(opacityMatch[0]) : 0.25;
+      // Default values
+      let x = 10, y = 10, blur = 10, spread = 0, color = "#000000", opacity = 0.5, inset = false;
 
-      setTextControls(prev => ({
-        ...prev,
-        x: x || 0,
-        y: y || 0,
-        blur: blur || 0,
-        color: hexToRgb(color).hex,
-        opacity: opacity
-      }));
-    } catch (error) {
-      // Error handled in safeApplyStyle
-    }
-  }, [safeApplyStyle, hexToRgb]);
+      // Inset check karo
+      if (shadowValue.includes('inset')) {
+        inset = true;
+      }
 
-  const applyGradientPreset = useCallback(async (preset: GradientPreset) => {
-    try {
-      await safeApplyStyle("background-image", preset.value);
+      // Color aur values extract karo
+      const colorMatch = shadowValue.match(/(rgba?\([^)]+\)|#[0-9a-fA-F]{3,6})/);
+      if (colorMatch) {
+        color = colorMatch[1];
+      }
 
-      const isLinear = preset.value.includes('linear-gradient');
-      const gradientContent = preset.value.split('(')[1]?.split(')')[0];
-      const colorStops = gradientContent ? gradientContent.split(',') : [];
-      const colors = [];
+      // Numbers extract karo
+      const numbers = shadowValue.match(/-?\d+\.?\d*/g);
+      if (numbers) {
+        const numValues = numbers.map(Number);
 
-      for (const stop of colorStops) {
-        const trimmedStop = stop.trim();
-        const colorMatch = trimmedStop.match(/#[a-fA-F0-9]{6}|#[a-fA-F0-9]{3}|rgb\([^)]+\)|rgba\([^)]+\)/);
-        const positionMatch = trimmedStop.match(/(\d+)%/);
+        if (numValues.length >= 2) {
+          x = numValues[0];
+          y = numValues[1];
+        }
+        if (numValues.length >= 3) {
+          blur = numValues[2];
+        }
+        if (numValues.length >= 4) {
+          spread = numValues[3];
+        }
 
-        if (colorMatch) {
-          const color = colorMatch[0];
-          const position = positionMatch ? parseInt(positionMatch[1]) : colors.length * 50;
-          colors.push({ color, position });
+        // Opacity extract karo rgba se
+        const rgbaMatch = shadowValue.match(/rgba?\([^)]+\)/);
+        if (rgbaMatch) {
+          const rgbaParts = rgbaMatch[0].match(/-?\d+\.?\d*/g);
+          if (rgbaParts && rgbaParts.length >= 4) {
+            opacity = parseFloat(rgbaParts[3]);
+          }
         }
       }
 
-      if (colors.length === 0) {
-        colors.push(
-          { color: "#6e8efb", position: 0 },
-          { color: "#a777e3", position: 100 }
-        );
-      }
-
-      let angle = 90;
-      if (isLinear) {
-        const angleMatch = preset.value.match(/linear-gradient\((\d+)deg/);
-        angle = angleMatch ? parseInt(angleMatch[1]) : 90;
-      }
-
-      setGradientControls({
-        type: isLinear ? "linear" : "radial",
-        angle: angle,
-        colors: colors
+      // Controls update karo
+      setBoxControls({
+        x,
+        y,
+        blur,
+        spread,
+        color,
+        opacity,
+        inset
       });
+
     } catch (error) {
       // Error handled in safeApplyStyle
     }
   }, [safeApplyStyle]);
 
-  // ✅ UPDATE: Custom style applications with safeApplyStyle
+
+  const applyTextPreset = useCallback(async (preset: ShadowPreset) => {
+    try {
+      await safeApplyStyle("text-shadow", preset.value);
+      setCurrentAppliedStyle(preset.value); // ✅ Applied style track karo
+    } catch (error) {
+      // Error handled in safeApplyStyle
+    }
+  }, [safeApplyStyle]);
+
+  const applyGradientPreset = useCallback(async (preset: GradientPreset) => {
+    try {
+      await safeApplyStyle("background-image", preset.value);
+      setCurrentAppliedStyle(preset.value); // ✅ Applied style track karo
+    } catch (error) {
+      // Error handled in safeApplyStyle
+    }
+  }, [safeApplyStyle]);
+
   const applyCustomBoxShadow = useCallback(async () => {
+    console.log("🎯 Starting box shadow application...");
+
+    setIsApplying(true);
     try {
       const { x, y, blur, spread, color, opacity, inset } = boxControls;
       const rgbColor = hexToRgb(color);
       const shadowValue = `${inset ? "inset " : ""}${x}px ${y}px ${blur}px ${spread}px rgba(${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b}, ${opacity})`;
-      await safeApplyStyle("box-shadow", shadowValue);
+
+      console.log("Applying:", shadowValue);
+
+      await applyStyle("box-shadow", shadowValue);
+      setCurrentAppliedStyle(shadowValue);
+
+      console.log(" Applied successfully");
+
     } catch (error) {
-      // Error handled in safeApplyStyle
+      console.error(" Application failed:", error);
+    } finally {
+      setIsApplying(false);
     }
-  }, [boxControls, safeApplyStyle, hexToRgb]);
+  }, [boxControls, applyStyle, hexToRgb]);
+
 
   const applyCustomTextShadow = useCallback(async () => {
     try {
@@ -539,10 +543,12 @@ const App: React.FC = () => {
       const rgbColor = hexToRgb(color);
       const shadowValue = `${x}px ${y}px ${blur}px rgba(${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b}, ${opacity})`;
       await safeApplyStyle("text-shadow", shadowValue);
+      setCurrentAppliedStyle(shadowValue); 
     } catch (error) {
       // Error handled in safeApplyStyle
     }
   }, [textControls, safeApplyStyle, hexToRgb]);
+  
 
   const applyCustomGradient = useCallback(async () => {
     try {
@@ -550,17 +556,14 @@ const App: React.FC = () => {
       const colorStops = colors.map(c => `${c.color} ${c.position}%`).join(', ');
       const gradientValue = `${type}-gradient(${type === 'linear' ? `${angle}deg` : 'circle'}, ${colorStops})`;
       await safeApplyStyle("background-image", gradientValue);
+      setCurrentAppliedStyle(gradientValue);
     } catch (error) {
       // Error handled in safeApplyStyle
     }
   }, [gradientControls, safeApplyStyle]);
 
-  // ✅ PERFORMANCE: Optimized control updates with debouncing
+
   const updateBoxControl = useCallback((key: keyof BoxShadowControls, value: string | number | boolean) => {
-    if (updateTimeoutRef.current) {
-      clearTimeout(updateTimeoutRef.current);
-    }
-    
     setBoxControls(prev => ({ ...prev, [key]: value }));
   }, []);
 
@@ -568,17 +571,30 @@ const App: React.FC = () => {
     if (updateTimeoutRef.current) {
       clearTimeout(updateTimeoutRef.current);
     }
-    
+
     setTextControls(prev => ({ ...prev, [key]: value }));
   }, []);
+
 
   const updateGradientControl = useCallback((key: keyof GradientControls, value: any) => {
     if (updateTimeoutRef.current) {
       clearTimeout(updateTimeoutRef.current);
     }
-    
-    setGradientControls(prev => ({ ...prev, [key]: value }));
-  }, []);
+
+    setGradientControls(prev => {
+      const updatedControls = { ...prev, [key]: value };
+
+      // ✅ AUTOMATICALLY APPLY WHEN GRADIENT CONTROLS CHANGE (CUSTOM TAB MEIN)
+      if (activeTab === 'background' && activeSubTab === 'custom' && !isApplying) {
+        // Thoda delay karke apply karo for better performance
+        updateTimeoutRef.current = setTimeout(() => {
+          applyCustomGradient();
+        }, 500);
+      }
+
+      return updatedControls;
+    });
+  }, [activeTab, activeSubTab, isApplying, applyCustomGradient]);
 
   const updateGradientColor = useCallback((index: number, color: string) => {
     const newColors = [...gradientControls.colors];
@@ -604,7 +620,6 @@ const App: React.FC = () => {
     updateGradientControl("colors", newColors);
   }, [gradientControls.colors, updateGradientControl]);
 
-  // ✅ UPDATE: Reset function with safeApplyStyle
   const resetControls = useCallback(async () => {
     if (!selectedElement || !checkApiReady()) return;
 
@@ -613,12 +628,22 @@ const App: React.FC = () => {
       if (activeTab === "box") {
         setBoxControls(DEFAULT_BOX_CONTROLS);
         await safeApplyStyle("box-shadow", "none");
+        setCurrentAppliedStyle("");
       } else if (activeTab === "text") {
         setTextControls(DEFAULT_TEXT_CONTROLS);
         await safeApplyStyle("text-shadow", "none");
+        setCurrentAppliedStyle("");
       } else if (activeTab === "background") {
-        setGradientControls(DEFAULT_GRADIENT_CONTROLS);
+        setGradientControls({
+          type: "linear",
+          angle: 90,
+          colors: [
+            { color: "#6e8efb", position: 0 },
+            { color: "#a777e3", position: 100 }
+          ]
+        });
         await safeApplyStyle("background-image", "none");
+        setCurrentAppliedStyle("");
       }
     } catch (error) {
       await handleApiError(error, "reset controls");
@@ -627,7 +652,6 @@ const App: React.FC = () => {
     }
   }, [selectedElement, checkApiReady, activeTab, safeApplyStyle, handleApiError]);
 
-  // ✅ PERFORMANCE: Memoized copy function
   const copyCSSCode = useCallback(() => {
     let cssCode = "";
     try {
@@ -682,9 +706,69 @@ const App: React.FC = () => {
     document.body.removeChild(textArea);
   };
 
-  // ✅ PERFORMANCE: Memoized preview generation
   const generatePreview = useCallback(() => {
     try {
+      const isCustomGradientApplied = currentAppliedStyle &&
+        currentAppliedStyle.includes('gradient') &&
+        activeSubTab === 'custom';
+
+      if (!currentAppliedStyle || (activeTab === 'background' && activeSubTab === 'custom' && !isCustomGradientApplied)) {
+        if (activeTab === "box") {
+          const { x, y, blur, spread, color, opacity, inset } = boxControls;
+          const rgbColor = hexToRgb(color);
+          const style = {
+            boxShadow: `${inset ? "inset " : ""}${x}px ${y}px ${blur}px ${spread}px rgba(${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b}, ${opacity})`,
+            backgroundImage: 'none',
+            textShadow: 'none'
+          };
+          return { style, text: "Webflow" };
+        } else if (activeTab === "text") {
+          const { x, y, blur, color, opacity } = textControls;
+          const rgbColor = hexToRgb(color);
+          const style = {
+            textShadow: `${x}px ${y}px ${blur}px rgba(${rgbColor.r}, ${rgbColor.g}, ${rgbColor.b}, ${opacity})`,
+            boxShadow: 'none',
+            backgroundImage: 'none'
+          };
+          return { style, text: "Webflow" };
+        } else {
+          const { type, angle, colors } = gradientControls;
+          const colorStops = colors.map(c => `${c.color} ${c.position}%`).join(', ');
+          const gradientValue = `${type}-gradient(${type === 'linear' ? `${angle}deg` : 'circle'}, ${colorStops})`;
+          const style = {
+            backgroundImage: gradientValue,
+            boxShadow: 'none',
+            textShadow: 'none'
+          };
+          return { style, text: "Webflow" };
+        }
+      }
+
+      if (activeSubTab === 'presets' && currentAppliedStyle) {
+        if (activeTab === "box") {
+          const style = {
+            boxShadow: currentAppliedStyle,
+            backgroundImage: 'none',
+            textShadow: 'none'
+          };
+          return { style, text: "Webflow" };
+        } else if (activeTab === "text") {
+          const style = {
+            textShadow: currentAppliedStyle,
+            boxShadow: 'none',
+            backgroundImage: 'none'
+          };
+          return { style, text: "Webflow" };
+        } else {
+          const style = {
+            backgroundImage: currentAppliedStyle,
+            boxShadow: 'none',
+            textShadow: 'none'
+          };
+          return { style, text: "Webflow" };
+        }
+      }
+
       if (activeTab === "box") {
         const { x, y, blur, spread, color, opacity, inset } = boxControls;
         const rgbColor = hexToRgb(color);
@@ -717,7 +801,12 @@ const App: React.FC = () => {
     } catch (error) {
       return { style: {}, text: "Webflow" };
     }
-  }, [activeTab, boxControls, textControls, gradientControls, hexToRgb]);
+  }, [activeTab, activeSubTab, boxControls, textControls, gradientControls, hexToRgb, currentAppliedStyle]);
+
+
+  useEffect(() => {
+    setCurrentAppliedStyle("");
+  }, [activeTab, activeSubTab]); // Dono tab changes par reset
 
   const { style: previewStyle, text: previewTextContent } = generatePreview();
 
@@ -837,19 +926,38 @@ const App: React.FC = () => {
                     />
                     <div className="slider-value w-[30px] text-right text-[11px]">{boxControls.opacity.toFixed(2)}</div>
                   </div>
-                  <div className="slider-container flex items-center gap-2">
-                    <label className="slider-label text-[11px]">Color</label>
-                    <input
-                      type="color"
-                      value={boxControls.color}
-                      onChange={e => updateBoxControl('color', e.target.value)}
-                      className="color-input"
-                    />
-                    <div className="ml-2 text-sm text-gray-700">{boxControls.color}</div>
+                  <div className="slider-container flex flex-col gap-2">
+                    <div className="flex items-center gap-2">
+                      <label className="slider-label text-[11px] w-[55px]">Color</label>
+                      <input
+                        type="color"
+                        value={getHexColor(boxControls.color)}
+                        onChange={e => {
+                          updateBoxControl('color', e.target.value);
+                        }}
+                        className="color-input w-8 h-8"
+                      />
+                      <div className="flex-1">
+                        <input
+                          type="text"
+                          value={boxControls.color}
+                          onChange={e => {
+                            // Text input se koi bhi format accept karega
+                            const newColor = e.target.value;
+                            updateBoxControl('color', newColor);
+                          }}
+                          placeholder="#000000 or rgba(0,0,0,0.5)"
+                          className="w-full text-xs border rounded px-2 py-1"
+                        />
+                      </div>
+                    </div>
+
+
                   </div>
                 </div>
               </>
             )}
+
             {activeTab === 'text' && (
               <div className="space-y-2">
                 {[
@@ -883,24 +991,43 @@ const App: React.FC = () => {
                   />
                   <div className="slider-value w-[30px] text-right text-[11px]">{textControls.opacity.toFixed(2)}</div>
                 </div>
-                <div className="slider-container flex items-center gap-2">
-                  <label className="slider-label text-[11px]">Color</label>
-                  <input
-                    type="color"
-                    value={textControls.color}
-                    onChange={e => updateTextControl('color', e.target.value)}
-                    className="color-input"
-                  />
-                  <div className="ml-2 text-sm text-gray-700">{textControls.color}</div>
+
+                <div className="slider-container flex flex-col gap-2">
+                  <div className="flex items-center gap-2">
+                    <label className="slider-label text-[11px] w-[55px]">Color</label>
+                    <input
+                      type="color"
+                      value={getHexColor(textControls.color)}
+                      onChange={e => {
+                        updateTextControl('color', e.target.value);
+                      }}
+                      className="color-input w-8 h-8"
+                    />
+                    <div className="flex-1">
+                      <input
+                        type="text"
+                        value={textControls.color}
+                        onChange={e => {
+                          // Text input se koi bhi format accept karega
+                          const newColor = e.target.value;
+                          updateTextControl('color', newColor);
+                        }}
+                        placeholder="#000000 or rgba(0,0,0,0.5)"
+                        className="w-full text-xs border rounded px-2 py-1"
+                      />
+                    </div>
+                  </div>
+
                 </div>
               </div>
             )}
+
             {activeTab === 'background' && (
               <div className="space-y-2">
-                <div className="flex items-center gap-2 bg-gray-50 p-1 rounded shadow-sm">
-                  <label className="w-[90px] text-[11px]">Gradient Type</label>
+                <div className="flex items-center gap-2 bg-gray-50 p-2 rounded shadow-sm">
+                  <label className="w-[90px] text-[11px] font-medium text-gray-700">Gradient Type</label>
                   <select
-                    className="flex-1 text-xs border rounded px-2 py-1"
+                    className="flex-1 text-xs border rounded px-2 py-1 bg-white"
                     value={gradientControls.type}
                     onChange={e => updateGradientControl('type', e.target.value)}
                   >
@@ -909,8 +1036,8 @@ const App: React.FC = () => {
                   </select>
                 </div>
                 {gradientControls.type === 'linear' && (
-                  <div className="slider-container bg-gray-50 p-1 rounded shadow-sm flex items-center gap-2">
-                    <label className="w-[55px] text-[11px]">Angle</label>
+                  <div className="slider-container bg-gray-50 p-2 rounded shadow-sm flex items-center gap-2">
+                    <label className="w-[90px] text-[11px] font-medium text-gray-700">Angle</label>
                     <input
                       type="range"
                       min="0"
@@ -919,41 +1046,60 @@ const App: React.FC = () => {
                       onChange={e => updateGradientControl('angle', parseInt(e.target.value, 10))}
                       className="slider-input flex-1"
                     />
-                    <div className="slider-value w-[30px] text-right text-[11px]">{gradientControls.angle}°</div>
+                    <div className="slider-value w-[35px] text-center text-[11px] font-medium">{gradientControls.angle}°</div>
                   </div>
                 )}
-                <div className="space-y-1">
+                <div className="space-y-2">
                   {gradientControls.colors.map((colorStop, index) => (
-                    <div key={index} className="flex items-center gap-2 bg-gray-50 p-1 rounded shadow-sm">
-                      <label className="w-[60px] text-[11px]">Color {index + 1}</label>
-                      <input
-                        type="color"
-                        value={colorStop.color}
-                        onChange={e => updateGradientColor(index, e.target.value)}
-                      />
-                      <input
-                        type="range"
-                        min="0"
-                        max="100"
-                        value={colorStop.position}
-                        onChange={e => updateGradientPosition(index, parseInt(e.target.value, 10))}
-                        className="flex-1 slider-input"
-                      />
-                      <div className="slider-value">{colorStop.position}%</div>
-                      {gradientControls.colors.length > 2 && (
-                        <button
-                          className="ml-2 text-[11px] px-2 py-1 rounded border"
-                          onClick={() => removeGradientColor(index)}
-                        >
-                          🗑️
-                        </button>
-                      )}
+                    <div key={index} className="flex flex-col gap-2 bg-gray-50 p-2 rounded shadow-sm">
+                      <div className="flex items-center gap-2">
+                        <label className="w-[90px] text-[11px] font-medium text-gray-700">Color {index + 1}</label>
+                        <input
+                          type="color"
+                          value={getHexColor(colorStop.color)}
+                          onChange={e => updateGradientColor(index, e.target.value)}
+                          className="color-input w-8 h-8 flex-shrink-0"
+                        />
+                        <div className="flex-1 min-w-0">
+                          <input
+                            type="text"
+                            value={colorStop.color}
+                            onChange={e => {
+                              const newColor = e.target.value;
+                              updateGradientColor(index, newColor);
+                            }}
+                            placeholder="#000000 or rgba(0,0,0,0.5)"
+                            className="w-full text-xs border rounded px-2 py-1 bg-white"
+                          />
+                        </div>
+                        {gradientControls.colors.length > 2 && (
+                          <button
+                            className="text-[11px] px-2 py-1 rounded border hover:bg-red-50 transition-colors flex-shrink-0"
+                            onClick={() => removeGradientColor(index)}
+                          >
+                            🗑️
+                          </button>
+                        )}
+                      </div>
+
+                      <div className="slider-container bg-gray-100 p-2 rounded flex items-center gap-2">
+                        <label className="w-[90px] text-[11px] font-medium text-gray-700">Position</label>
+                        <input
+                          type="range"
+                          min="0"
+                          max="100"
+                          value={colorStop.position}
+                          onChange={e => updateGradientPosition(index, parseInt(e.target.value, 10))}
+                          className="slider-input flex-1"
+                        />
+                        <div className="slider-value w-[35px] text-center text-[11px] font-medium">{colorStop.position}%</div>
+                      </div>
                     </div>
                   ))}
                 </div>
                 <div>
                   <button
-                    className="w-full text-xs py-1 rounded border hover:bg-gray-100"
+                    className="w-full text-xs py-2 rounded border hover:bg-gray-100 transition-colors font-medium"
                     onClick={addGradientColor}
                   >
                     + Add Color
@@ -980,11 +1126,18 @@ const App: React.FC = () => {
           {copied ? 'Copied!' : 'Copy'}
         </button>
         <button
-          className={`flex-1 py-1 text-xs bg-green-600 rounded hover:bg-green-700`}
+          className={`flex-1 py-1 text-xs rounded transition-colors ${isApplying
+              ? 'bg-gray-500 cursor-not-allowed text-white'
+              : 'bg-green-600 hover:bg-green-700 text-white'
+            }`}
           onClick={() => {
-            if (activeTab === 'box') applyCustomBoxShadow();
-            else if (activeTab === 'text') applyCustomTextShadow();
-            else if (activeTab === 'background') applyCustomGradient();
+            // Sirf custom tab mein hi apply button kaam kare
+            if (activeSubTab === 'custom' && !isApplying) {
+              console.log("🖱️ APPLY BUTTON CLICKED - Active Tab:", activeTab);
+              if (activeTab === 'box') applyCustomBoxShadow();
+              else if (activeTab === 'text') applyCustomTextShadow();
+              else if (activeTab === 'background') applyCustomGradient();
+            }
           }}
           disabled={isApplying}
         >
