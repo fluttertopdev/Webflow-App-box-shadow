@@ -245,7 +245,7 @@ const App: React.FC = () => {
           elementCheckIntervalRef.current = setTimeout(checkElement, 2000);
         }
       } catch (error) {
-        // ✅ ERROR FIX: Handle API errors silently
+        //  ERROR FIX: Handle API errors silently
         if (isMounted && checkCount < MAX_CHECKS) {
           checkCount++;
           elementCheckIntervalRef.current = setTimeout(checkElement, 2000);
@@ -267,10 +267,9 @@ const App: React.FC = () => {
   }, [checkApiReady]);
 
 
-
   const applyStyle = useCallback(async (property: string, value: string) => {
     if (!checkApiReady()) {
-      console.warn(" Webflow API not ready");
+      console.warn("Webflow API not ready");
       return;
     }
 
@@ -278,92 +277,125 @@ const App: React.FC = () => {
     try {
       element = await webflow.getSelectedElement();
       if (!element) {
-        console.warn(" No element selected");
         return;
       }
     } catch (error) {
-      console.error(" Error getting selected element:", error);
+      console.error("Error getting selected element:", error);
       return;
     }
 
     setIsApplying(true);
     try {
-      if (!element.styles) {
-        console.warn(" Element has no styles property");
-        return;
-      }
+      console.log(`Applying ${property} with SMART class targeting`);
 
-      console.log(` Applying ${property} = "${value}" to element`);
-
+      // Get current styles
       const currentStyles = await element.getStyles();
-      let elementStyles = [];
+      let allStyles = Array.isArray(currentStyles) ? currentStyles : Array.from(currentStyles);
 
-      if (Array.isArray(currentStyles)) {
-        elementStyles = currentStyles;
-      } else if (currentStyles && typeof currentStyles[Symbol.iterator] === 'function') {
-        elementStyles = Array.from(currentStyles);
-      }
+      //  STEP 1: COLLECT ALL CLASSES ON THIS ELEMENT
+      const validClassInfo = [];
+      const allClassNames = [];
 
-      console.log(` Found ${elementStyles.length} existing styles`);
-
-      let targetStyle = null;
-      let styleName = "";
-
-      for (const style of elementStyles) {
+      for (const style of allStyles) {
         try {
+          const styleName = await style.getName();
           const properties = await style.getProperties();
-          if (properties && property in properties) {
-            targetStyle = style;
-            console.log(` Found existing style with ${property}`);
-            break;
+          
+          if (styleName) {
+            validClassInfo.push({
+              style: style,
+              name: styleName,
+              properties: properties
+            });
+            allClassNames.push(styleName);
+            console.log(` Found class: ${styleName}`);
           }
         } catch (error) {
-          continue;
+          console.log(' Invalid style skipped');
         }
       }
 
-      if (!targetStyle) {
-        styleName = `custom_${property}_${Date.now()}`;
-        console.log(` Creating new style: ${styleName}`);
+      console.log(` Selected element has classes: ${allClassNames.join(', ')}`);
 
+      //  STEP 2: CLEAN THE PROPERTY FROM ALL CLASSES FIRST
+      for (const classInfo of validClassInfo) {
         try {
-          const newStyle = await webflow.createStyle(styleName);
-          await newStyle.setProperties({ [property]: value });
-
-          const updatedStyles = [...elementStyles, newStyle];
-          await element.setStyles(updatedStyles);
-
-          console.log(`Created and applied new style: ${styleName}`);
+          const { style, name, properties } = classInfo;
+          if (properties && property in properties) {
+            const { [property]: removed, ...cleanProperties } = properties;
+            await style.setProperties(cleanProperties);
+            console.log(`Cleaned ${property} from class: ${name}`);
+          }
         } catch (error) {
-          console.error(" Style creation failed, trying alternative:", error);
-
-          // Alternative approach
-          styleName = `element_${property}_${Math.random().toString(36).substr(2, 9)}`;
-          const newStyle = await webflow.createStyle(styleName);
-          await newStyle.setProperties({ [property]: value });
-
-          const updatedStyles = [...elementStyles, newStyle];
-          await element.setStyles(updatedStyles);
-
-          console.log(` Created alternative style: ${styleName}`);
+          console.log(` Couldn't clean class: ${classInfo.name}`);
         }
-      } else {
-        console.log(` Updating existing style with ${property}`);
-        const currentProperties = await targetStyle.getProperties();
-        const newProperties = { ...currentProperties, [property]: value };
-        await targetStyle.setProperties(newProperties);
-
-        console.log(` Updated existing style with new ${property}`);
       }
+
+      //  STEP 3: UNIVERSAL SMART STRATEGY FOR ANY CLASS NAMES
+      let targetClass = null;
+      let strategy = "";
+      let affectedElements = "";
+
+      // Case A: Element has only ONE class
+      if (allClassNames.length === 1) {
+        targetClass = validClassInfo[0];
+        strategy = "SINGLE_CLASS";
+        affectedElements = `All elements with class "${allClassNames[0]}"`;
+        console.log(` Strategy: Single class → Affects all elements with "${allClassNames[0]}"`);
+      }
+      // Case B: Element has MULTIPLE classes
+      else if (allClassNames.length > 1) {
+        //  SMART: Use the SECOND class (look_2) for elements with multiple classes
+        // This ensures Box 2 & 4 (look_1 + look_2) only affect each other
+        targetClass = validClassInfo.find(cls => cls.name === allClassNames[1]);
+        strategy = "MULTIPLE_CLASSES_SECOND";
+        affectedElements = `Only elements with class "${allClassNames[1]}" (and its combinations)`;
+        console.log(` Strategy: Multiple classes → Using second class "${allClassNames[1]}"`);
+      }
+
+      //  STEP 4: APPLY STYLE TO TARGET CLASS
+      if (targetClass) {
+        const { style, name, properties } = targetClass;
+        
+        console.log(` Applying ${property} to class: ${name}`);
+        console.log(`   Before:`, properties);
+        
+        const newProperties = { ...properties, [property]: value };
+        await style.setProperties(newProperties);
+        
+        const updatedProperties = await style.getProperties();
+        console.log(`   After:`, updatedProperties);
+        
+        console.log(` Successfully applied to class: ${name}`);
+      }
+
+      setCurrentAppliedStyle(value);
+
+      //  STEP 5: SHOW SMART RESULTS
+      console.log(`🎯 SMART TARGETING RESULTS:`);
+      console.log(`• Selected Element Classes: ${allClassNames.join(' + ')}`);
+      console.log(`• Strategy: ${strategy}`);
+      console.log(`• Target Class: ${targetClass?.name}`);
+      console.log(`• Property: ${property} = ${value}`);
+      console.log(`• Elements Affected: ${affectedElements}`);
+
+      // Show which boxes will be affected based on your setup
+      if (allClassNames.includes('look_1') && !allClassNames.includes('look_2')) {
+        console.log(` AFFECTS: Box 1 and Box 3 only (both have only look_1)`);
+        console.log(` DOES NOT AFFECT: Box 2 and Box 4 (they have additional look_2 class)`);
+      } else if (allClassNames.includes('look_1') && allClassNames.includes('look_2')) {
+        console.log(` AFFECTS: Box 2 and Box 4 only (both have look_2)`);
+        console.log(` DOES NOT AFFECT: Box 1 and Box 3 (they don't have look_2)`);
+      }
+
+      console.log(` Precision targeting successful!`);
 
     } catch (error) {
-      console.error(' Style application failed:', error);
+      console.error('Application failed:', error);
     } finally {
       setIsApplying(false);
     }
   }, [checkApiReady]);
-
-
 
   const safeApplyStyle = useCallback(async (property: string, value: string) => {
     try {
@@ -434,7 +466,7 @@ const App: React.FC = () => {
       await safeApplyStyle("box-shadow", preset.value);
       setCurrentAppliedStyle(preset.value);
 
-      // ✅ PRESET SE CONTROLS UPDATE KARO
+      //  PRESET SE CONTROLS UPDATE KARO
       // Box shadow value parse karke controls mein set karo
       const shadowValue = preset.value;
 
@@ -498,7 +530,7 @@ const App: React.FC = () => {
   const applyTextPreset = useCallback(async (preset: ShadowPreset) => {
     try {
       await safeApplyStyle("text-shadow", preset.value);
-      setCurrentAppliedStyle(preset.value); // ✅ Applied style track karo
+      setCurrentAppliedStyle(preset.value); //  Applied style track karo
     } catch (error) {
       // Error handled in safeApplyStyle
     }
@@ -507,7 +539,7 @@ const App: React.FC = () => {
   const applyGradientPreset = useCallback(async (preset: GradientPreset) => {
     try {
       await safeApplyStyle("background-image", preset.value);
-      setCurrentAppliedStyle(preset.value); // ✅ Applied style track karo
+      setCurrentAppliedStyle(preset.value); //  Applied style track karo
     } catch (error) {
       // Error handled in safeApplyStyle
     }
@@ -584,7 +616,7 @@ const App: React.FC = () => {
     setGradientControls(prev => {
       const updatedControls = { ...prev, [key]: value };
 
-      // ✅ AUTOMATICALLY APPLY WHEN GRADIENT CONTROLS CHANGE (CUSTOM TAB MEIN)
+      //  AUTOMATICALLY APPLY WHEN GRADIENT CONTROLS CHANGE (CUSTOM TAB MEIN)
       if (activeTab === 'background' && activeSubTab === 'custom' && !isApplying) {
         // Thoda delay karke apply karo for better performance
         updateTimeoutRef.current = setTimeout(() => {
