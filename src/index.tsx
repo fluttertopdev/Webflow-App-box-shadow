@@ -29,23 +29,23 @@ interface GradientControls {
   colors: { color: string; position: number }[];
 }
 
-interface GradientPreset extends ShadowPreset {}
+interface GradientPreset extends ShadowPreset { }
 
 const DEFAULT_BOX_CONTROLS: BoxShadowControls = {
   x: 10,
   y: 10,
   blur: 10,
   spread: 0,
-  color: "#000000",
+  color: " ",
   opacity: 0.5,
   inset: false,
 };
 
 const DEFAULT_TEXT_CONTROLS: ShadowControls = {
   x: 0,
-  y: 2,
+  y: 0,
   blur: 4,
-  color: "#000000",
+  color: " ",
   opacity: 0.25,
 };
 
@@ -60,42 +60,40 @@ const DEFAULT_GRADIENT_CONTROLS: GradientControls = {
 
 //  PRESETS 
 const BOX_PRESETS: ShadowPreset[] = [
-  { id: "soft", name: "Soft", value: "0 4px 8px rgba(0, 0, 0, 0.25)", preview: "0 4px 8px rgba(0, 0, 0, 0.25)" },
-  { id: "medium", name: "Medium", value: "0 6px 12px rgba(0, 0, 0, 0.35)", preview: "0 6px 12px rgba(0, 0, 0, 0.35)" },
-  { id: "hard", name: "Hard", value: "0 8px 16px rgba(0, 0, 0, 0.45)", preview: "0 8px 16px rgba(0, 0, 0, 0.45)" },
-  { id: "inner", name: "Inner", value: "inset 0 2px 6px rgba(0, 0, 0, 0.35)", preview: "inset 0 2px 6px rgba(0, 0, 0, 0.35)" },
-  { id: "floating", name: "Floating", value: "0 12px 30px rgba(0, 0, 0, 0.4)", preview: "0 12px 30px rgba(0, 0, 0, 0.4)" },
+  { id: "soft", name: "Purple", value: " rgba(110,20,179,0.5) 0px 1.99146px 15.4338px 0px", preview: " rgba(110,20,179,0.5) 0px 1.99146px 15.4338px 0px;" },
+  { id: "soft-dark", name: "Soft Dark", value: "rgba(0,0,0,0.2) 0px 1px 6.93px 0.07px", preview: "rgba(0,0,0,0.2) 0px 1px 6.93px 0.07px"},
+  { id: "soft-light", name: "Soft Light", value: "rgb(255,255,255) -8px 0px 15px 5px", preview: "rgb(255,255,255) -8px 0px 15px 5px" },
+  { id: "inner-soft-dark", name: "Inner", value: "rgba(0,0,0,0.08) 0px 0px 20px 0px inset", preview: "rgba(0,0,0,0.08) 0px 0px 20px 0px inset" },
+  { id: "deep", name: "Deep ", value: "rgba(24,21,27,0.2) 0px 5px 0px 0px", preview: "rgba(24,21,27,0.2) 0px 5px 0px 0px" },,
   { id: "subtle", name: "Subtle", value: "0 2px 4px rgba(0, 0, 0, 0.2)", preview: "0 2px 4px rgba(0, 0, 0, 0.2)" },
   { id: "light-inset", name: "Light Inset", value: "rgb(230,230,230) 0px 55px 25px -25px inset", preview: "rgb(230,230,230) 0px 55px 25px -25px inset" },
-  { id: "elegant", name: "Elegant", value: "0 18px 40px rgba(0, 0, 0, 0.35)", preview: "0 18px 40px rgba(0, 0, 0, 0.35)" },
+  { id: "strong", name: "Strong Shadow", value: "rgba(0,0,0,0.4) 0px 8px 32px 0px", preview: "rgba(0,0,0,0.4) 0px 8px 32px 0px" },
   { id: "soft-dark", name: "Soft Dark", value: "rgba(0,0,0,0.357) 1.6px 1.6px 3.2px 0px", preview: "rgba(0,0,0,0.357) 1.6px 1.6px 3.2px 0px" },
   { id: "dark-shadow", name: "Dark Shadow", value: "rgba(0,0,0,0.8) 4px 4px 10px 0px", preview: "rgba(0,0,0,0.8) 4px 4px 10px 0px" },
-  { id: "double-glow", name: "Double Glow", value: "0 3px 9px 4px rgba(200,85,238,0.56)", preview: "0 3px 9px 4px rgba(200,85,238,0.56)" },
-  { id: "green-glow", name: "Green Glow", value: "0 4px 28px 0 rgba(26,188,72,0.5)", preview: "0 4px 28px 0 rgba(26,188,72,0.5)" },
-  { id: "blue-glow", name: "Blue Glow", value: "0 0 10px 10px #5b95e5", preview: "0 0 10px 10px #5b95e5" },
-  { id: "inner-red", name: "Inner Red", value: "inset 0 0 10px 7px #ff0000, 0 0 0 currentColor, 0 0 0 currentColor", preview: "inset 0 0 10px 7px #ff0000, 0 0 0 currentColor, 0 0 0 currentColor" },
+  { id: "blue-soft", name: "Blue Soft", value: "rgba(0,160,210,0.2) 0px 0px 100px 0px", preview: "rgba(0,160,210,0.2) 0px 0px 100px 0px" },
+  { id: "medium-dark", name: "Medium Dark", value: "rgba(0,0,0,0.6) 0px 2px 12px 0px", preview: "rgba(0,0,0,0.6) 0px 2px 12px 0px" },
+  { id: "soft-depth", name: "Soft Depth", value: "rgba(0,0,0,0.2) 0px 5px 10px 20px", preview: "rgba(0,0,0,0.2) 0px 5px 10px 20px" },
+  { id: "purple-outline", name: "Purple Outline", value: "rgb(203,0,240) 0px 0px 0px 4px", preview: "rgb(203,0,240) 0px 0px 0px 4px" },
   { id: "blue", name: "Blue", value: "2px 29px 29px -1px rgba(94, 120, 179, 0.53)", preview: "2px 29px 29px -1px rgba(94, 120, 179, 0.53)" },
-  { id: "multi-color", name: "Multi Color", value: "14px 3px 10px 5px #f4eb0d50, -1px -12px 10px 5px #0deebf50, -10px 12px 10px 5px #ee0d4350", preview: "14px 3px 10px 5px #f4eb0d50, -1px -12px 10px 5px #0deebf50, -10px 12px 10px 5px #ee0d4350" },
+  { id: "inner-fade", name: "Inner Fade", value: "rgba(0,0,0,0.1) 0px 0px 0px 150px inset", preview: "rgba(0,0,0,0.1) 0px 0px 0px 150px inset" },
   { id: "blue-outline", name: "Blue Outline", value: "rgba(16,155,172,0.2) 0px 0px 0px 2px", preview: "rgba(16,155,172,0.2) 0px 0px 0px 2px" },
   { id: "orange-outline", name: "Orange Outline", value: "rgba(202,74,31,0.12) 0px 0px 0px 7.58316px", preview: "rgba(202,74,31,0.12) 0px 0px 0px 7.58316px" },
   { id: "double-border", name: "Double Border", value: "rgb(195,196,199) 0px 0px 0px 1px,rgba(0,0,0,0.07) 0px 2px 4px 0px", preview: "rgb(195,196,199) 0px 0px 0px 1px,rgba(0,0,0,0.07) 0px 2px 4px 0px" },
   { id: "orange-border", name: "Orange Border", value: "rgb(226,119,48) 0px 0px 0px 2px,rgba(0,0,0,0.15) 0px 2px 4px 0px", preview: "rgb(226,119,48) 0px 0px 0px 2px,rgba(0,0,0,0.15) 0px 2px 4px 0px" },
   { id: "cyan-outline", name: "Cyan Outline", value: "rgb(51,180,206) 0px 0px 0px 4px", preview: "rgb(51,180,206) 0px 0px 0px 4px" },
   { id: "double-outline", name: "Double Outline", value: "rgb(30,30,30) 0px 0px 0px 3px,rgb(0,124,186) 0px 0px 0px 6px", preview: "rgb(30,30,30) 0px 0px 0px 3px,rgb(0,124,186) 0px 0px 0px 6px" },
-  { id: "complex-multi", name: "Complex Multi", value: "rgba(0,0,0,0) 0px 0px 0px 0px,rgba(0,0,0,0) 0px 0px 0px 0px,rgb(255,255,255) 0px 1px 0px 0px inset,rgba(213,217,232,0.88) 0px 0px 0px 1px,rgba(29,33,48,0.04) 0px 5px 5px -2.5px,rgba(255,129,112,0.16) 0px 10px 10px -5px,rgba(255,129,112,0.08) 0px 24px 24px -8px", preview: "rgba(0,0,0,0) 0px 0px 0px 0px,rgba(0,0,0,0) 0px 0px 0px 0px,rgb(255,255,255) 0px 1px 0px 0px inset,rgba(213,217,232,0.88) 0px 0px 0px 1px,rgba(29,33,48,0.04) 0px 5px 5px -2.5px,rgba(255,129,112,0.16) 0px 10px 10px -5px,rgba(255,129,112,0.08) 0px 24px 24px -8px" },
+  { id: "light-gray", name: "Light Gray", value: "rgb(229,229,229) 0px 1px 8px 0px", preview: "rgb(229,229,229) 0px 1px 8px 0px" },
   { id: "orange-inset", name: "Orange Inset", value: "rgb(248,161,0) 0px 0px 10px 0px inset", preview: "rgb(248,161,0) 0px 0px 10px 0px inset" },
-  { id: "glow-combo", name: "Glow Combo", value: "0 0 2px 0 #000000, 0 0 0 currentColor,inset 0 0 16px currentColor", preview: "0 0 2px 0 #000000, 0 0 0 currentColor,inset 0 0 16px currentColor" },
-  { id: "top-dark", name: "Top Dark", value: "rgba(0,0,0,0) 0px 0px 0px 0px,rgba(0,0,0,0) 0px 0px 0px 0px,rgb(17,17,17) 0px -12px 16px 0px", preview: "rgba(0,0,0,0) 0px 0px 0px 0px,rgba(0,0,0,0) 0px 0px 0px 0px,rgb(17,17,17) 0px -12px 16px 0px" },
+  { id: "midnight-shadow", name: "Midnight", value: "rgb(46,48,62) 0px 0px 8.8px 8.8px", preview: "rgb(46,48,62) 0px 0px 8.8px 8.8px" },
+  { id: "heavy-drop", name: "Heavy Drop", value: "rgba(0,0,0,0.4) 40px 50px 50px 10px", preview: "rgba(0,0,0,0.4) 40px 50px 50px 10px" },
   { id: "dark-deep", name: "Dark Deep", value: "rgb(4,0,17) 0px 0px 300px 0px inset", preview: "rgb(4,0,17) 0px 0px 300px 0px inset" },
+  { id: "blue", name: "test", value: "5px 2px 30px -5px rgba(84, 129, 19, 1.53)", preview: "5px 2px 30px -5px rgba(84, 129, 19, 1.53)" },
 ];
 
 const TEXT_PRESETS: ShadowPreset[] = [
-  { id: "soft-text", name: "Soft Text", value: "0 1px 2px rgba(0, 0, 0, 0.35)", preview: "0 1px 2px rgba(0, 0, 0, 0.35)" },
-  { id: "bold-text", name: "Bold Text", value: "0 2px 4px rgba(0, 0, 0, 0.45)", preview: "0 2px 4px rgba(0, 0, 0, 0.45)" },
-  { id: "glow", name: "Glow Effect", value: "0 0 8px rgba(0, 150, 255, 0.85)", preview: "0 0 8px rgba(0, 150, 255, 0.85)" },
   { id: "outline", name: "Text Outline", value: "1px 1px 0 rgba(0, 0, 0, 0.8), -1px -1px 0 rgba(0, 0, 0, 0.8), 1px -1px 0 rgba(0, 0, 0, 0.8), -1px 1px 0 rgba(0, 0, 0, 0.8)", preview: "1px 1px 0 rgba(0, 0, 0, 0.8)" },
   { id: "elegant-text", name: "Elegant Text", value: "2px 2px 4px rgba(0, 0, 0, 0.2)", preview: "2px 2px 4px rgba(0, 0, 0, 0.2)" },
-  { id: "neon-text", name: "Neon Text", value: "0 0 5px #fff, 0 0 10px #fff, 0 0 15px #ff00ff, 0 0 20px #ff00ff", preview: "0 0 5px rgba(255, 255, 255, 0.8), 0 0 10px rgba(255, 0, 255, 0.5)" },
+  { id: "soft-text-shadow", name: "Soft Text ", value: "3px 3px 5px rgba(128, 0, 0, 1)", preview: "3px 3px 5px rgba(128, 0, 0, 1)" },
   { id: "Distant-text", name: "Distant Text", value: "0px 3px 0px #b2a98f, 0px 14px 10px rgba(0,0,0,0.15), 0px 24px 2px rgba(0,0,0,0.1), 0px 24px 30px rgba(0,0,0,0.1)", preview: "0px 3px 0px #b2a98f, 0px 14px 10px rgba(0,0,0,0.15), 0px 24px 2px rgba(0,0,0,0.1), 0px 24px 30px rgba(0,0,0,0.1)" },
   { id: "Heavy-text", name: "Heavy Text", value: "0px 4px 3px rgba(0,0,0,0.4), 0px 8px 13px rgba(0,0,0,0.1), 0px 18px 23px rgba(0,0,0,0.1)", preview: "0px 4px 3px rgba(0,0,0,0.4), 0px 8px 13px rgba(0,0,0,0.1), 0px 18px 23px rgba(0,0,0,0.1)" },
   { id: "seventies-style", name: "70's Style Text", value: "-10px 10px 0px #00e6e6", preview: "-10px 10px 0px #00e6e6" },
@@ -159,9 +157,9 @@ const parseBoxLayer = (layer: string) => {
   }
 
   const nums = (layer.match(/-?\d*\.?\d+(?=px)/g) || []).map(parseFloat);
-  const x      = nums[0] ?? 0;
-  const y      = nums[1] ?? 0;
-  const blur   = nums[2] ?? 0;
+  const x = nums[0] ?? 0;
+  const y = nums[1] ?? 0;
+  const blur = nums[2] ?? 0;
   const spread = nums[3] ?? 0;
 
   return { x, y, blur, spread, color, opacity, inset };
@@ -184,8 +182,8 @@ const parseTextLayer = (layer: string) => {
   }
 
   const nums = (layer.match(/-?\d*\.?\d+(?=px)/g) || []).map(parseFloat);
-  const x    = nums[0] ?? 0;
-  const y    = nums[1] ?? 0;
+  const x = nums[0] ?? 0;
+  const y = nums[1] ?? 0;
   const blur = nums[2] ?? 0;
 
   return { x, y, blur, color, opacity };
@@ -236,9 +234,8 @@ const PresetGrid: React.FC<{
         return (
           <div key={preset.id} className="overflow-hidden rounded-lg">
             <button
-              className={`preset-card p-1 border border-solid transition-shadow w-full h-full ${
-                isApplied ? "bg-green-100 border-green-500 cursor-not-allowed" : "bg-white border-gray-200 hover:shadow-md"
-              }`}
+              className={`preset-card p-1 border border-solid transition-shadow w-full h-full ${isApplied ? "bg-green-100 border-green-500 cursor-not-allowed" : "bg-white border-gray-200 hover:shadow-md"
+                }`}
               onClick={() => {
                 if (!isApplied) {
                   if (activeTab === "box") onApplyBoxPreset(preset);
@@ -255,8 +252,8 @@ const PresetGrid: React.FC<{
                   activeTab === "box"
                     ? { boxShadow: preset.value, width: "80%" }
                     : activeTab === "text"
-                    ? { textShadow: preset.value, width: "80%" }
-                    : { backgroundImage: preset.value, width: "80%" }
+                      ? { textShadow: preset.value, width: "80%" }
+                      : { backgroundImage: preset.value, width: "80%" }
                 }
               >
                 {activeTab === "text" && "Webflow"}
@@ -279,7 +276,7 @@ const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<"box" | "text" | "background">("box");
   const [activeSubTab, setActiveSubTab] = useState<"presets" | "custom">("presets");
 
-  const [boxControls, setBoxControls] = useState<BoxShadowControls>(DEFAULT_BOX_CONTROLS);
+  const [boxControls, setBoxControls] = useState<BoxShadowControls>();
   const [textControls, setTextControls] = useState<ShadowControls>(DEFAULT_TEXT_CONTROLS);
   const [gradientControls, setGradientControls] = useState<GradientControls>(DEFAULT_GRADIENT_CONTROLS);
 
@@ -294,7 +291,7 @@ const App: React.FC = () => {
     background: "",
   });
 
-  
+
   const [customArmed, setCustomArmed] = useState<{ box: boolean; text: boolean; background: boolean }>({
     box: false,
     text: false,
@@ -321,7 +318,7 @@ const App: React.FC = () => {
       if (typeof webflow !== "undefined" && webflow.notify) {
         await webflow.notify({ type: "Error", message: `Failed to ${context}. Please try again.` });
       }
-    } catch {}
+    } catch { }
   }, []);
 
   const checkApiReady = useCallback(() => {
@@ -377,21 +374,62 @@ const App: React.FC = () => {
 
   const applyStyle = useCallback(
     async (property: string, value: string) => {
-      if (!checkApiReady()) return;
+      // Updated: API ready check with user notification
+      if (!checkApiReady()) {
+        try {
+          await webflow.notify({
+            type: "Error",
+            message: "Webflow API is not available. Please try again.",
+          });
+        } catch { }
+        return;
+      }
 
-      let element;
+      let element: any;
+
+      // Updated: Robust element fetch with 10s timeout + user notifications
       try {
-        element = await webflow.getSelectedElement();
-        if (!element) return;
-      } catch (error) {
-        console.error("Error getting selected element:", error);
+        const timeoutPromise = new Promise((_, reject) =>
+          setTimeout(() => reject(new Error("Request timeout")), 10000)
+        );
+
+        element = await Promise.race([webflow.getSelectedElement(), timeoutPromise]);
+
+        if (!element) {
+          try {
+            await webflow.notify({
+              type: "Error",
+              message:
+                "No element selected. Please select an element in the Webflow Designer.",
+            });
+          } catch { }
+          return;
+        }
+      } catch (error: any) {
+        try {
+          if (error?.message === "Request timeout") {
+            await webflow.notify({
+              type: "Error",
+              message: "Request timeout. Please try again.",
+            });
+          } else {
+            await webflow.notify({
+              type: "Error",
+              message: "Failed to get selected element. Please try again.",
+            });
+          }
+        } catch { }
         return;
       }
 
       setIsApplying(true);
+
       try {
+        // (unchanged) Pull current styles
         const currentStyles = await element.getStyles();
-        let allStyles = Array.isArray(currentStyles) ? currentStyles : Array.from(currentStyles);
+        let allStyles = Array.isArray(currentStyles)
+          ? currentStyles
+          : Array.from(currentStyles as any);
 
         const validClassInfo: any[] = [];
         const allClassNames: string[] = [];
@@ -404,19 +442,56 @@ const App: React.FC = () => {
               validClassInfo.push({ style, name: styleName, properties });
               allClassNames.push(styleName);
             }
-          } catch {}
+          } catch { }
         }
 
         let targetClass: any = null;
 
+        // Updated: numeric auto-class creation (1,2,3,4,5,6...)
         if (allClassNames.length === 0) {
           try {
-            const classType = property === "text-shadow" ? "text" : property === "box-shadow" ? "box" : "gradient";
-            const newClassName = `${classType}-effect-${Date.now()}`;
+            const classType =
+              property === "text-shadow"
+                ? "text"
+                : property === "box-shadow"
+                  ? "box"
+                  : "gradient";
+
+            const basePrefix = `${classType}-effect-`;
+
+            // Find next available index by scanning existing styles on the element
+            const takenNums = new Set<number>();
+            // If you also want to consider global styles, you can optionally try webflow.getStyleByName in a loop.
+
+            // Collect numbers already present on the element (defensive)
+            for (const name of allClassNames) {
+              if (name.startsWith(basePrefix)) {
+                const n = parseInt(name.slice(basePrefix.length), 10);
+                if (!Number.isNaN(n)) takenNums.add(n);
+              }
+            }
+
+            // Also probe a few global names to avoid collision if they exist elsewhere
+            // (best effort; safe to ignore errors)
+            for (let probe = 1; probe <= 50; probe++) {
+              try {
+                const maybe = await webflow.getStyleByName(`${basePrefix}${probe}`);
+                if (maybe) takenNums.add(probe);
+              } catch { }
+            }
+
+            let nextIndex = 1;
+            while (takenNums.has(nextIndex)) nextIndex++;
+            const newClassName = `${basePrefix}${nextIndex}`;
+
             const newStyle = await webflow.createStyle(newClassName);
             await element.setStyles([newStyle]);
+
             const updatedStyles = await element.getStyles();
-            allStyles = Array.isArray(updatedStyles) ? updatedStyles : Array.from(updatedStyles);
+            allStyles = Array.isArray(updatedStyles)
+              ? updatedStyles
+              : Array.from(updatedStyles as any);
+
             for (const style of allStyles) {
               try {
                 const styleName = await style.getName();
@@ -427,30 +502,35 @@ const App: React.FC = () => {
                   allClassNames.push(styleName);
                   break;
                 }
-              } catch {}
+              } catch { }
             }
           } catch (createError) {
             console.error("Failed to create new class:", createError);
           }
         }
 
-    
+        // (unchanged) Remove the property from other classes before applying
         for (const classInfo of validClassInfo) {
           try {
             const { style, properties } = classInfo;
             if (properties && property in properties) {
-              const { [property]: removed, ...cleanProperties } = properties;
+              const { [property]: _removed, ...cleanProperties } = properties;
               await style.setProperties(cleanProperties);
             }
-          } catch {}
+          } catch { }
         }
 
+        // (unchanged) Pick target class
         if (!targetClass) {
           if (allClassNames.length === 1) targetClass = validClassInfo[0];
-          else if (allClassNames.length > 1)
-            targetClass = validClassInfo.find((cls) => cls.name === allClassNames[1]) || validClassInfo[0];
+          else if (allClassNames.length > 1) {
+            targetClass =
+              validClassInfo.find((cls) => cls.name === allClassNames[1]) ||
+              validClassInfo[0];
+          }
         }
 
+        // (unchanged) Apply property to target/fallback
         if (targetClass) {
           const { style, properties } = targetClass;
           const newProperties = { ...properties, [property]: value };
@@ -464,6 +544,8 @@ const App: React.FC = () => {
         }
 
         setCurrentAppliedStyle(value);
+
+
       } catch (error) {
         console.error("Application failed:", error);
         await handleApiError(error, `apply ${property}`);
@@ -474,7 +556,7 @@ const App: React.FC = () => {
     [checkApiReady, handleApiError]
   );
 
-  
+
   const hexToRgb = useCallback((color: string) => {
     try {
       if (color.startsWith("rgb")) {
@@ -507,7 +589,7 @@ const App: React.FC = () => {
         }
         return { r, g, b, a: 1, hex: `#${h.substring(0, 6)}` };
       }
-     
+
       return { r: 0, g: 0, b: 0, a: 1, hex: "#000000" };
     } catch {
       return { r: 0, g: 0, b: 0, a: 1, hex: "#000000" };
@@ -523,9 +605,9 @@ const App: React.FC = () => {
     [hexToRgb]
   );
 
- 
+
   const buildBoxShadowRaw = useCallback(() => {
-    
+
     if (!customArmed.box && activeTab === "box" && activeSubTab === "custom" && customPresetString.box) {
       return customPresetString.box;
     }
@@ -562,7 +644,7 @@ const App: React.FC = () => {
     return `${type}-gradient(${type === "linear" ? `${angle}deg` : "circle"}, ${stops})`;
   }, [gradientControls, customArmed.background, activeTab, activeSubTab, customPresetString.background]);
 
-  
+
   const pendingStyleForTab = useCallback(() => {
     if (activeTab === "box") {
       const raw = activeSubTab === "custom" ? buildBoxShadowRaw() : currentAppliedStyle;
@@ -581,13 +663,13 @@ const App: React.FC = () => {
     activeTab === "box"
       ? pendingStyleForTab() !== "" && pendingStyleForTab() === lastApplied.box
       : activeTab === "text"
-      ? pendingStyleForTab() !== "" && pendingStyleForTab() === lastApplied.text
-      : pendingStyleForTab() !== "" && pendingStyleForTab() === lastApplied.background;
+        ? pendingStyleForTab() !== "" && pendingStyleForTab() === lastApplied.text
+        : pendingStyleForTab() !== "" && pendingStyleForTab() === lastApplied.background;
 
   const applyDisabledBecauseSame = isSameAsApplied;
   const applyDisabled = isApplying || applyDisabledBecauseSame || !hasSelectedElement;
 
- 
+
   const safeApplyStyle = useCallback(
     async (property: string, value: string, tabKey?: "box" | "text" | "background") => {
       try {
@@ -603,7 +685,7 @@ const App: React.FC = () => {
           if (typeof webflow !== "undefined" && webflow.notify) {
             await webflow.notify({ type: "Error", message: `Failed to apply ${property}. Please try again.` });
           }
-        } catch {}
+        } catch { }
       }
     },
     [applyStyle]
@@ -622,7 +704,7 @@ const App: React.FC = () => {
       const parsed = parseBoxLayer(firstLayer);
       setBoxControls(parsed);
 
-  
+
       setCustomPresetString((prev) => ({ ...prev, box: preset.value }));
       setCustomArmed((prev) => ({ ...prev, box: false }));
     },
@@ -672,7 +754,7 @@ const App: React.FC = () => {
     [lastApplied.background, safeApplyStyle]
   );
 
-  
+
   const applyCustomBoxShadow = useCallback(async () => {
     setIsApplying(true);
     try {
@@ -739,10 +821,10 @@ const App: React.FC = () => {
     };
   }, [gradientControls, activeTab, activeSubTab, customArmed.background, buildGradientRaw, lastApplied.background, applyCustomGradient]);
 
-  
+
   const touchCustom = useCallback((tab: "box" | "text" | "background") => {
     setCustomArmed((p) => ({ ...p, [tab]: true }));
-    setCustomPresetString((p) => ({ ...p, [tab]: "" })); 
+    setCustomPresetString((p) => ({ ...p, [tab]: "" }));
   }, []);
 
   const updateBoxControl = useCallback((key: keyof BoxShadowControls, value: string | number | boolean) => {
@@ -821,7 +903,7 @@ const App: React.FC = () => {
     }
   }, [selectedElement, checkApiReady, activeTab, safeApplyStyle, handleApiError]);
 
- 
+
   const copyCSSCode = useCallback(() => {
     let cssCode = "";
     try {
@@ -854,7 +936,7 @@ const App: React.FC = () => {
             setTimeout(() => setCopied(false), 2000);
           });
       }
-    } catch {}
+    } catch { }
   }, [activeTab, buildBoxShadowRaw, buildTextShadowRaw, buildGradientRaw]);
 
 
@@ -901,7 +983,7 @@ const App: React.FC = () => {
     }
   }, [activeTab, activeSubTab, buildBoxShadowRaw, buildTextShadowRaw, buildGradientRaw, currentAppliedStyle]);
 
- 
+
   useEffect(() => {
     if (activeSubTab !== "custom") return;
     if (!currentAppliedStyle) return;
@@ -954,9 +1036,8 @@ const App: React.FC = () => {
           {(["box", "text", "background"] as const).map((tab) => (
             <button
               key={tab}
-              className={`tab-btn py-1 text-xs rounded-md transition-colors ${
-                activeTab === tab ? "bg-blue-200 text-blue-700 font-semibold" : "text-gray-500 hover:text-blue-600"
-              }`}
+              className={`tab-btn py-1 text-xs rounded-md transition-colors ${activeTab === tab ? "bg-blue-200 text-blue-700 font-semibold" : "text-gray-500 hover:text-blue-600"
+                }`}
               onClick={() => setActiveTab(tab)}
             >
               {tab === "box" ? "Box Shadow" : tab === "text" ? "Text Shadow" : "Gradient"}
@@ -979,9 +1060,8 @@ const App: React.FC = () => {
         {(["presets", "custom"] as const).map((subTab) => (
           <button
             key={subTab}
-            className={`flex-1 py-1 text-xs rounded shadow transition-colors ${
-              activeSubTab === subTab ? "bg-blue-100 text-blue-700" : "text-gray-500 hover:text-blue-600"
-            }`}
+            className={`flex-1 py-1 text-xs rounded shadow transition-colors ${activeSubTab === subTab ? "bg-blue-100 text-blue-700" : "text-gray-500 hover:text-blue-600"
+              }`}
             onClick={() => setActiveSubTab(subTab)}
           >
             {subTab === "presets" ? "Presets" : "Custom"}
@@ -1236,9 +1316,8 @@ const App: React.FC = () => {
           {copied ? "Copied!" : "Copy"}
         </button>
         <button
-          className={`flex-1 py-1 text-xs rounded transition-colors flex items-center justify-center gap-1 ${
-            applyDisabled ? "bg-gray-500 cursor-not-allowed" : "bg-green-600 hover:bg-green-700"
-          }`}
+          className={`flex-1 py-1 text-xs rounded transition-colors flex items-center justify-center gap-1 ${applyDisabled ? "bg-gray-500 cursor-not-allowed" : "bg-green-600 hover:bg-green-700"
+            }`}
           onMouseEnter={() => setIsApplyHovered(true)}
           onMouseLeave={() => setIsApplyHovered(false)}
           onClick={() => {
@@ -1252,8 +1331,8 @@ const App: React.FC = () => {
             !hasSelectedElement
               ? "No element selected"
               : applyDisabledBecauseSame
-              ? "Not applicable: style already applied"
-              : "Apply style"
+                ? "Not applicable: style already applied"
+                : "Apply style"
           }
         >
           {applyDisabled && isApplyHovered ? (
