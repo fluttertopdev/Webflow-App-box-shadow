@@ -1,15 +1,12 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import ReactDOM from "react-dom/client";
 
-/**
- * NOTE (re: issue #4 – CDN in prod):
- * This file only uses Tailwind utility classes. Ensure your app bundles Tailwind locally
- * (PostCSS build) and does NOT load `cdn.tailwindcss.com` in index.html.
- */
+
+
+
 
 declare const webflow: any;
 
-/* ---------- Types ---------- */
 interface ShadowPreset {
   id: string;
   name: string;
@@ -36,15 +33,14 @@ interface GradientControls {
   colors: { color: string; position: number }[];
 }
 
-interface GradientPreset extends ShadowPreset {}
+interface GradientPreset extends ShadowPreset { }
 
-/* ---------- Safe defaults (no blanks) ---------- */
 const DEFAULT_BOX_CONTROLS: BoxShadowControls = {
   x: 10,
   y: 10,
   blur: 10,
   spread: 0,
-  color: "#000000", // FIX: never blank; avoids parse errors
+  color: "#000000", 
   opacity: 0.5,
   inset: false,
 };
@@ -53,7 +49,7 @@ const DEFAULT_TEXT_CONTROLS: ShadowControls = {
   x: 0,
   y: 0,
   blur: 4,
-  color: "#000000", // FIX: never blank; avoids parse errors
+  color: "#000000", 
   opacity: 0.25,
 };
 
@@ -66,7 +62,6 @@ const DEFAULT_GRADIENT_CONTROLS: GradientControls = {
   ],
 };
 
-/* ---------- PRESETS (syntax-clean) ---------- */
 const BOX_PRESETS: ShadowPreset[] = [
   { id: "soft", name: "Purple", value: "rgba(110,20,179,0.5) 0px 1.99146px 15.4338px 0px", preview: "rgba(110,20,179,0.5) 0px 1.99146px 15.4338px 0px" },
   { id: "soft-light", name: "Soft Light", value: "rgb(255,255,255) -8px 0px 15px 5px", preview: "rgb(255,255,255) -8px 0px 15px 5px" },
@@ -80,20 +75,20 @@ const BOX_PRESETS: ShadowPreset[] = [
   { id: "blue-soft", name: "Blue Soft", value: "rgba(0,160,210,0.2) 0px 0px 100px 0px", preview: "rgba(0,160,210,0.2) 0px 0px 100px 0px" },
   { id: "medium-dark", name: "Medium Dark", value: "rgba(0,0,0,0.6) 0px 2px 12px 0px", preview: "rgba(0,0,0,0.6) 0px 2px 12px 0px" },
   { id: "soft-depth", name: "Soft Depth", value: "rgba(0,0,0,0.2) 0px 5px 10px 20px", preview: "rgba(0,0,0,0.2) 0px 5px 10px 20px" },
-  { id: "purple-outline", name: "Purple Outline", value: "rgb(203,0,240) 0px 0px 0px 4px", preview: "rgb(203,0,240) 0px 0px 0px 4px" },
+  { id: "blue-drop", name: "Blue Drop", value: "rgb(21,180,252) 0px 12px 12px 0px", preview: "rgb(21,180,252) 0px 12px 12px 0px" },
   { id: "blue", name: "Blue", value: "2px 29px 29px -1px rgba(94, 120, 179, 0.53)", preview: "2px 29px 29px -1px rgba(94, 120, 179, 0.53)" },
   { id: "inner-fade", name: "Inner Fade", value: "rgba(0,0,0,0.1) 0px 0px 0px 150px inset", preview: "rgba(0,0,0,0.1) 0px 0px 0px 150px inset" },
-  { id: "blue-outline", name: "Blue Outline", value: "rgba(16,155,172,0.2) 0px 0px 0px 2px", preview: "rgba(16,155,172,0.2) 0px 0px 0px 2px" },
+  { id: "inner-soft", name: "Inner Soft", value: "inset 0 10px 50px rgba(0,0,0,0.1)", preview: "inset 0 10px 50px rgba(0,0,0,0.1)" },
   { id: "orange-outline", name: "Orange Outline", value: "rgba(202,74,31,0.12) 0px 0px 0px 7.58316px", preview: "rgba(202,74,31,0.12) 0px 0px 0px 7.58316px" },
   { id: "double-border", name: "Double Border", value: "rgb(195,196,199) 0px 0px 0px 1px, rgba(0,0,0,0.07) 0px 2px 4px 0px", preview: "rgb(195,196,199) 0px 0px 0px 1px, rgba(0,0,0,0.07) 0px 2px 4px 0px" },
-  { id: "orange-border", name: "Orange Border", value: "rgb(226,119,48) 0px 0px 0px 2px, rgba(0,0,0,0.15) 0px 2px 4px 0px", preview: "rgb(226,119,48) 0px 0px 0px 2px, rgba(0,0,0,0.15) 0px 2px 4px 0px" },
-  { id: "cyan-outline", name: "Cyan Outline", value: "rgb(51,180,206) 0px 0px 0px 4px", preview: "rgb(51,180,206) 0px 0px 0px 4px" },
-  { id: "double-outline", name: "Double Outline", value: "rgb(30,30,30) 0px 0px 0px 3px, rgb(0,124,186) 0px 0px 0px 6px", preview: "rgb(30,30,30) 0px 0px 0px 3px, rgb(0,124,186) 0px 0px 0px 6px" },
+  { id: "top-light", name: "Top Light", value: "rgba(0,0,0,0.2) 1px -4px 6px 0px", preview: "rgba(0,0,0,0.2) 1px -4px 6px 0px" },
   { id: "light-gray", name: "Light Gray", value: "rgb(229,229,229) 0px 1px 8px 0px", preview: "rgb(229,229,229) 0px 1px 8px 0px" },
+  { id: "cyan-outline", name: "Cyan Outline", value: "rgb(51,180,206) 0px 0px 0px 4px", preview: "rgb(51,180,206) 0px 0px 0px 4px" },
   { id: "orange-inset", name: "Orange Inset", value: "rgb(248,161,0) 0px 0px 10px 0px inset", preview: "rgb(248,161,0) 0px 0px 10px 0px inset" },
   { id: "midnight-shadow", name: "Midnight", value: "rgb(46,48,62) 0px 0px 8.8px 8.8px", preview: "rgb(46,48,62) 0px 0px 8.8px 8.8px" },
   { id: "heavy-drop", name: "Heavy Drop", value: "rgba(0,0,0,0.4) 40px 50px 50px 10px", preview: "rgba(0,0,0,0.4) 40px 50px 50px 10px" },
   { id: "dark-deep", name: "Dark Deep", value: "rgb(4,0,17) 0px 0px 300px 0px inset", preview: "rgb(4,0,17) 0px 0px 300px 0px inset" },
+  { id: "orange-border", name: "Orange Border", value: "rgb(226,119,48) 0px 0px 0px 2px, rgba(0,0,0,0.15) 0px 2px 4px 0px", preview: "rgb(226,119,48) 0px 0px 0px 2px, rgba(0,0,0,0.15) 0px 2px 4px 0px" },
 ];
 
 const TEXT_PRESETS: ShadowPreset[] = [
@@ -127,7 +122,6 @@ const GRADIENT_PRESETS: GradientPreset[] = [
   { id: "neon-mix", name: "Neon Mix", value: "linear-gradient(-225deg, #69EACB 0%, #EACCF8 48%, #6654F1 100%)", preview: "linear-gradient(-225deg, #69EACB 0%, #EACCF8 48%, #6654F1 100%)" },
 ];
 
-/* ---------- Utils ---------- */
 const canon = (s: string) =>
   (s || "")
     .replace(/\s+/g, " ")
@@ -207,7 +201,7 @@ const parseGradient = (val: string) => {
   return { type, angle, colors };
 };
 
-/* ---------- UI: Preset Grid ---------- */
+
 const PresetGrid: React.FC<{
   presets: ShadowPreset[];
   activeTab: "box" | "text" | "background";
@@ -222,9 +216,8 @@ const PresetGrid: React.FC<{
       return (
         <div key={preset.id} className="overflow-hidden rounded-lg">
           <button
-            className={`preset-card p-1 border border-solid transition-shadow w-full h-full ${
-              isApplied ? "bg-green-100 border-green-500 cursor-not-allowed" : "bg-white border-gray-200 hover:shadow-md"
-            }`}
+            className={`preset-card p-1 border border-solid transition-shadow w-full h-full ${isApplied ? "bg-green-100 border-green-500 cursor-not-allowed" : "bg-white border-gray-200 hover:shadow-md"
+              }`}
             onClick={() => {
               if (isApplied) return;
               if (activeTab === "box") onApplyBoxPreset(preset);
@@ -240,8 +233,8 @@ const PresetGrid: React.FC<{
                 activeTab === "box"
                   ? { boxShadow: preset.value, width: "80%" }
                   : activeTab === "text"
-                  ? { textShadow: preset.value, width: "80%" }
-                  : { backgroundImage: preset.value, width: "80%" }
+                    ? { textShadow: preset.value, width: "80%" }
+                    : { backgroundImage: preset.value, width: "80%" }
               }
             >
               {activeTab === "text" && "Webflow"}
@@ -255,7 +248,7 @@ const PresetGrid: React.FC<{
   </div>
 ));
 
-/* ---------- Main App ---------- */
+
 const App: React.FC = () => {
   const [currentAppliedStyle, setCurrentAppliedStyle] = useState<string>("");
   const [hasSelectedElement, setHasSelectedElement] = useState(false);
@@ -263,7 +256,7 @@ const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<"box" | "text" | "background">("box");
   const [activeSubTab, setActiveSubTab] = useState<"presets" | "custom">("presets");
 
-  // FIX: initialize with safe defaults (prevents undefined access + runtime crashes)
+  
   const [boxControls, setBoxControls] = useState<BoxShadowControls>(DEFAULT_BOX_CONTROLS);
   const [textControls, setTextControls] = useState<ShadowControls>(DEFAULT_TEXT_CONTROLS);
   const [gradientControls, setGradientControls] = useState<GradientControls>(DEFAULT_GRADIENT_CONTROLS);
@@ -283,19 +276,19 @@ const App: React.FC = () => {
   });
 
   const previewRef = useRef<HTMLDivElement>(null);
-  const updateTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);          // FIX: browser-safe timer type
-  const elementCheckTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);    // FIX: browser-safe timer type
+  const updateTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);        
+  const elementCheckTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);    
   const boxDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const textDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const handleApiError = useCallback(async (error: any, context: string) => {
-    console.warn(`API Error in ${context}:`, error);
+    
     if (error?.status === 404 || error?.code === 404) return;
     try {
       if (typeof webflow !== "undefined" && webflow.notify) {
         await webflow.notify({ type: "Error", message: `Failed to ${context}. Please try again.` });
       }
-    } catch {}
+    } catch { }
   }, []);
 
   const checkApiReady = useCallback(() => {
@@ -306,7 +299,7 @@ const App: React.FC = () => {
     }
   }, []);
 
-  /* ---------- Selected element polling (bounded + cleaned) ---------- */
+
   useEffect(() => {
     let isMounted = true;
     let checks = 0;
@@ -345,13 +338,13 @@ const App: React.FC = () => {
     };
   }, [checkApiReady]);
 
-  /* ---------- Apply style (single-class target; cleans property on others) ---------- */
+
   const applyStyle = useCallback(
     async (property: "box-shadow" | "text-shadow" | "background-image", value: string) => {
       if (!checkApiReady()) {
         try {
           await webflow.notify({ type: "Error", message: "Webflow API is not available. Please try again." });
-        } catch {}
+        } catch { }
         return;
       }
 
@@ -362,13 +355,13 @@ const App: React.FC = () => {
         if (!element) {
           try {
             await webflow.notify({ type: "Error", message: "No element selected. Please select an element in the Webflow Designer." });
-          } catch {}
+          } catch { }
           return;
         }
       } catch (error: any) {
         try {
           await webflow.notify({ type: "Error", message: error?.message === "Request timeout" ? "Request timeout. Please try again." : "Failed to get selected element. Please try again." });
-        } catch {}
+        } catch { }
         return;
       }
 
@@ -388,12 +381,12 @@ const App: React.FC = () => {
               validClassInfo.push({ style, name: styleName, properties });
               allClassNames.push(styleName);
             }
-          } catch {}
+          } catch { }
         }
 
         let targetClass: any = null;
 
-        // If element has no styles, create a minimal namespaced class and attach
+     
         if (allClassNames.length === 0) {
           try {
             const classType = property === "text-shadow" ? "text" : property === "box-shadow" ? "box" : "gradient";
@@ -410,7 +403,7 @@ const App: React.FC = () => {
               try {
                 const maybe = await webflow.getStyleByName(`${basePrefix}${probe}`);
                 if (maybe) takenNums.add(probe);
-              } catch {}
+              } catch { }
             }
 
             let nextIndex = 1;
@@ -433,14 +426,14 @@ const App: React.FC = () => {
                   allClassNames.push(styleName);
                   break;
                 }
-              } catch {}
+              } catch { }
             }
           } catch (createError) {
-            console.error("Failed to create new class:", createError);
+           
           }
         }
 
-        // Remove the same property from other classes to avoid conflicts
+      
         for (const classInfo of validClassInfo) {
           try {
             const { style, properties } = classInfo;
@@ -448,10 +441,10 @@ const App: React.FC = () => {
               const { [property]: _removed, ...cleanProperties } = properties;
               await style.setProperties(cleanProperties);
             }
-          } catch {}
+          } catch { }
         }
 
-        // Choose a target class
+      
         if (!targetClass) {
           if (allClassNames.length === 1) targetClass = validClassInfo[0];
           else if (allClassNames.length > 1) {
@@ -459,7 +452,7 @@ const App: React.FC = () => {
           }
         }
 
-        // Finally set property on the target (or fallback)
+        
         if (targetClass) {
           const { style, properties } = targetClass;
           const newProperties = { ...properties, [property]: value };
@@ -474,7 +467,7 @@ const App: React.FC = () => {
 
         setCurrentAppliedStyle(value);
       } catch (error) {
-        console.error("Application failed:", error);
+        
         await handleApiError(error, `apply ${property}`);
       } finally {
         setIsApplying(false);
@@ -483,7 +476,7 @@ const App: React.FC = () => {
     [checkApiReady, handleApiError]
   );
 
-  /* ---------- Color helpers ---------- */
+ 
   const hexToRgb = useCallback((color: string) => {
     try {
       if (!color) return { r: 0, g: 0, b: 0, a: 1, hex: "#000000" };
@@ -530,7 +523,7 @@ const App: React.FC = () => {
     return "#000000";
   }, [hexToRgb]);
 
-  /* ---------- Builders ---------- */
+
   const buildBoxShadowRaw = useCallback(() => {
     if (!customArmed.box && activeTab === "box" && activeSubTab === "custom" && customPresetString.box) {
       return customPresetString.box;
@@ -585,8 +578,8 @@ const App: React.FC = () => {
     activeTab === "box"
       ? pendingStyleForTab() !== "" && pendingStyleForTab() === lastApplied.box
       : activeTab === "text"
-      ? pendingStyleForTab() !== "" && pendingStyleForTab() === lastApplied.text
-      : pendingStyleForTab() !== "" && pendingStyleForTab() === lastApplied.background;
+        ? pendingStyleForTab() !== "" && pendingStyleForTab() === lastApplied.text
+        : pendingStyleForTab() !== "" && pendingStyleForTab() === lastApplied.background;
 
   const applyDisabledBecauseSame = isSameAsApplied;
   const applyDisabled = isApplying || applyDisabledBecauseSame || !hasSelectedElement;
@@ -603,13 +596,13 @@ const App: React.FC = () => {
           if (typeof webflow !== "undefined" && webflow.notify) {
             await webflow.notify({ type: "Error", message: `Failed to apply ${property}. Please try again.` });
           }
-        } catch {}
+        } catch { }
       }
     },
     [applyStyle]
   );
 
-  /* ---------- Preset apply handlers ---------- */
+ 
   const applyBoxPreset = useCallback(
     async (preset: ShadowPreset) => {
       const v = canon(preset.value);
@@ -655,7 +648,7 @@ const App: React.FC = () => {
     [lastApplied.background, safeApplyStyle]
   );
 
-  /* ---------- Custom auto-apply (debounced) ---------- */
+  
   const applyCustomBoxShadow = useCallback(async () => {
     setIsApplying(true);
     try {
@@ -715,7 +708,7 @@ const App: React.FC = () => {
     return () => { if (updateTimeoutRef.current) clearTimeout(updateTimeoutRef.current); };
   }, [gradientControls, activeTab, activeSubTab, customArmed.background, buildGradientRaw, lastApplied.background, applyCustomGradient]);
 
-  /* ---------- Control setters ---------- */
+  
   const touchCustom = useCallback((tab: "box" | "text" | "background") => {
     setCustomArmed((p) => ({ ...p, [tab]: true }));
     setCustomPresetString((p) => ({ ...p, [tab]: "" }));
@@ -765,7 +758,7 @@ const App: React.FC = () => {
     setGradientControls((prev) => ({ ...prev, colors: newColors }));
   }, [gradientControls.colors, touchCustom]);
 
-  /* ---------- Reset ---------- */
+  
   const resetControls = useCallback(async () => {
     if (!selectedElement || !checkApiReady()) return;
     setIsApplying(true);
@@ -797,7 +790,7 @@ const App: React.FC = () => {
     }
   }, [selectedElement, checkApiReady, activeTab, safeApplyStyle, handleApiError]);
 
-  /* ---------- Copy CSS ---------- */
+ 
   const copyCSSCode = useCallback(() => {
     let cssCode = "";
     try {
@@ -823,10 +816,10 @@ const App: React.FC = () => {
           setTimeout(() => setCopied(false), 2000);
         });
       }
-    } catch {}
+    } catch { }
   }, [activeTab, buildBoxShadowRaw, buildTextShadowRaw, buildGradientRaw]);
 
-  /* ---------- Preview ---------- */
+ 
   const generatePreview = useCallback(() => {
     try {
       if (activeSubTab === "custom") {
@@ -922,9 +915,8 @@ const App: React.FC = () => {
           {(["box", "text", "background"] as const).map((tab) => (
             <button
               key={tab}
-              className={`tab-btn py-1 text-xs rounded-md transition-colors ${
-                activeTab === tab ? "bg-blue-200 text-blue-700 font-semibold" : "text-gray-500 hover:text-blue-600"
-              }`}
+              className={`tab-btn py-1 text-xs rounded-md transition-colors ${activeTab === tab ? "bg-blue-200 text-blue-700 font-semibold" : "text-gray-500 hover:text-blue-600"
+                }`}
               onClick={() => setActiveTab(tab)}
             >
               {tab === "box" ? "Box Shadow" : tab === "text" ? "Text Shadow" : "Gradient"}
@@ -947,9 +939,8 @@ const App: React.FC = () => {
         {(["presets", "custom"] as const).map((subTab) => (
           <button
             key={subTab}
-            className={`flex-1 py-1 text-xs rounded shadow transition-colors ${
-              activeSubTab === subTab ? "bg-blue-100 text-blue-700" : "text-gray-500 hover:text-blue-600"
-            }`}
+            className={`flex-1 py-1 text-xs rounded shadow transition-colors ${activeSubTab === subTab ? "bg-blue-100 text-blue-700" : "text-gray-500 hover:text-blue-600"
+              }`}
             onClick={() => setActiveSubTab(subTab)}
           >
             {subTab === "presets" ? "Presets" : "Custom"}
@@ -1204,9 +1195,8 @@ const App: React.FC = () => {
           {copied ? "Copied!" : "Copy"}
         </button>
         <button
-          className={`flex-1 py-1 text-xs rounded transition-colors flex items-center justify-center gap-1 ${
-            applyDisabled ? "bg-gray-500 cursor-not-allowed" : "bg-green-600 hover:bg-green-700"
-          }`}
+          className={`flex-1 py-1 text-xs rounded transition-colors flex items-center justify-center gap-1 ${applyDisabled ? "bg-gray-500 cursor-not-allowed" : "bg-green-600 hover:bg-green-700"
+            }`}
           onMouseEnter={() => setIsApplyHovered(true)}
           onMouseLeave={() => setIsApplyHovered(false)}
           onClick={() => {
@@ -1220,8 +1210,8 @@ const App: React.FC = () => {
             !hasSelectedElement
               ? "No element selected"
               : applyDisabledBecauseSame
-              ? "Not applicable: style already applied"
-              : "Apply style"
+                ? "Not applicable: style already applied"
+                : "Apply style"
           }
         >
           {applyDisabled && isApplyHovered ? (
