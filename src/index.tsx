@@ -1,10 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import ReactDOM from "react-dom/client";
 
-
-
-
-
 declare const webflow: any;
 
 interface ShadowPreset {
@@ -62,6 +58,7 @@ const DEFAULT_GRADIENT_CONTROLS: GradientControls = {
   ],
 };
 
+// ALL PRESETS
 const BOX_PRESETS: ShadowPreset[] = [
   { id: "soft", name: "Purple", value: "rgba(110,20,179,0.5) 0px 1.99146px 15.4338px 0px", preview: "rgba(110,20,179,0.5) 0px 1.99146px 15.4338px 0px" },
   { id: "soft-light", name: "Soft Light", value: "rgb(255,255,255) -8px 0px 15px 5px", preview: "rgb(255,255,255) -8px 0px 15px 5px" },
