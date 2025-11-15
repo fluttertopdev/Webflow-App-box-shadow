@@ -1,10 +1,10 @@
 {
-  "name": "first-webflow-project",
+  "name": "Smart Shadows",
   "publicDir": "public",
   "size": "comfortable",
   "apiVersion": "2",
   "extension": {
-    "url": "http://localhost:1337"
+    "url": "https://68e6589e89ef889cd402604d.webflow-ext.com"
   }
 }
 

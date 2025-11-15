@@ -1,5 +1,5 @@
 {
-  "name": "first-webflow-project",
+  "name": "Smart Shadows",
   "version": "1.0.0",
   "scripts": {
     "dev": "npm install && concurrently \"webflow extension serve\" \"npm run watch-webpack\"",

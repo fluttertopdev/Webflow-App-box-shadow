@@ -36,7 +36,7 @@ const DEFAULT_BOX_CONTROLS: BoxShadowControls = {
   y: 10,
   blur: 10,
   spread: 0,
-  color: "#000000", 
+  color: "#000000",
   opacity: 0.5,
   inset: false,
 };
@@ -45,7 +45,7 @@ const DEFAULT_TEXT_CONTROLS: ShadowControls = {
   x: 0,
   y: 0,
   blur: 4,
-  color: "#000000", 
+  color: "#000000",
   opacity: 0.25,
 };
 
@@ -253,33 +253,30 @@ const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<"box" | "text" | "background">("box");
   const [activeSubTab, setActiveSubTab] = useState<"presets" | "custom">("presets");
 
-  
+
   const [boxControls, setBoxControls] = useState<BoxShadowControls>(DEFAULT_BOX_CONTROLS);
   const [textControls, setTextControls] = useState<ShadowControls>(DEFAULT_TEXT_CONTROLS);
   const [gradientControls, setGradientControls] = useState<GradientControls>(DEFAULT_GRADIENT_CONTROLS);
-
   const [isApplying, setIsApplying] = useState(false);
   const [copied, setCopied] = useState(false);
   const [isApplyHovered, setIsApplyHovered] = useState(false);
-
   const [lastApplied, setLastApplied] = useState<{ box: string; text: string; background: string }>({ box: "", text: "", background: "" });
-
   const [customArmed, setCustomArmed] = useState<{ box: boolean; text: boolean; background: boolean }>({
     box: false, text: false, background: false,
   });
-
   const [customPresetString, setCustomPresetString] = useState<{ box: string; text: string; background: string }>({
     box: "", text: "", background: "",
-  });
+  })
+
 
   const previewRef = useRef<HTMLDivElement>(null);
-  const updateTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);        
-  const elementCheckTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);    
+  const updateTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const elementCheckTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const boxDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const textDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const handleApiError = useCallback(async (error: any, context: string) => {
-    
+
     if (error?.status === 404 || error?.code === 404) return;
     try {
       if (typeof webflow !== "undefined" && webflow.notify) {
@@ -336,6 +333,9 @@ const App: React.FC = () => {
   }, [checkApiReady]);
 
 
+
+
+
   const applyStyle = useCallback(
     async (property: "box-shadow" | "text-shadow" | "background-image", value: string) => {
       if (!checkApiReady()) {
@@ -383,7 +383,7 @@ const App: React.FC = () => {
 
         let targetClass: any = null;
 
-     
+
         if (allClassNames.length === 0) {
           try {
             const classType = property === "text-shadow" ? "text" : property === "box-shadow" ? "box" : "gradient";
@@ -426,11 +426,11 @@ const App: React.FC = () => {
               } catch { }
             }
           } catch (createError) {
-           
+
           }
         }
 
-      
+
         for (const classInfo of validClassInfo) {
           try {
             const { style, properties } = classInfo;
@@ -441,7 +441,7 @@ const App: React.FC = () => {
           } catch { }
         }
 
-      
+
         if (!targetClass) {
           if (allClassNames.length === 1) targetClass = validClassInfo[0];
           else if (allClassNames.length > 1) {
@@ -449,7 +449,7 @@ const App: React.FC = () => {
           }
         }
 
-        
+
         if (targetClass) {
           const { style, properties } = targetClass;
           const newProperties = { ...properties, [property]: value };
@@ -464,7 +464,7 @@ const App: React.FC = () => {
 
         setCurrentAppliedStyle(value);
       } catch (error) {
-        
+
         await handleApiError(error, `apply ${property}`);
       } finally {
         setIsApplying(false);
@@ -473,7 +473,7 @@ const App: React.FC = () => {
     [checkApiReady, handleApiError]
   );
 
- 
+
   const hexToRgb = useCallback((color: string) => {
     try {
       if (!color) return { r: 0, g: 0, b: 0, a: 1, hex: "#000000" };
@@ -599,7 +599,7 @@ const App: React.FC = () => {
     [applyStyle]
   );
 
- 
+
   const applyBoxPreset = useCallback(
     async (preset: ShadowPreset) => {
       const v = canon(preset.value);
@@ -645,7 +645,7 @@ const App: React.FC = () => {
     [lastApplied.background, safeApplyStyle]
   );
 
-  
+
   const applyCustomBoxShadow = useCallback(async () => {
     setIsApplying(true);
     try {
@@ -705,7 +705,7 @@ const App: React.FC = () => {
     return () => { if (updateTimeoutRef.current) clearTimeout(updateTimeoutRef.current); };
   }, [gradientControls, activeTab, activeSubTab, customArmed.background, buildGradientRaw, lastApplied.background, applyCustomGradient]);
 
-  
+
   const touchCustom = useCallback((tab: "box" | "text" | "background") => {
     setCustomArmed((p) => ({ ...p, [tab]: true }));
     setCustomPresetString((p) => ({ ...p, [tab]: "" }));
@@ -755,7 +755,7 @@ const App: React.FC = () => {
     setGradientControls((prev) => ({ ...prev, colors: newColors }));
   }, [gradientControls.colors, touchCustom]);
 
-  
+
   const resetControls = useCallback(async () => {
     if (!selectedElement || !checkApiReady()) return;
     setIsApplying(true);
@@ -787,7 +787,7 @@ const App: React.FC = () => {
     }
   }, [selectedElement, checkApiReady, activeTab, safeApplyStyle, handleApiError]);
 
- 
+
   const copyCSSCode = useCallback(() => {
     let cssCode = "";
     try {
@@ -816,7 +816,7 @@ const App: React.FC = () => {
     } catch { }
   }, [activeTab, buildBoxShadowRaw, buildTextShadowRaw, buildGradientRaw]);
 
- 
+
   const generatePreview = useCallback(() => {
     try {
       if (activeSubTab === "custom") {
